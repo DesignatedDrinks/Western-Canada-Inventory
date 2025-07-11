@@ -75,9 +75,14 @@
     const API_URL = 'https://script.google.com/macros/s/AKfycbyE5WZG0nUnrDLL0HfROliIdvWVRynC3nt-bWt6eTlvZP-InbhxsxBCtZWyM9BsM7Gz-Q/exec';
 
     async function fetchInventory() {
-      const res = await fetch(API_URL);
-      const products = await res.json();
-      renderProducts(products.sort((a, b) => a['Product Title'].localeCompare(b['Product Title'])));
+      try {
+        const res = await fetch(API_URL);
+        const products = await res.json();
+        renderProducts(products.sort((a, b) => a.productTitle.localeCompare(b.productTitle)));
+      } catch (error) {
+        document.getElementById('productGrid').innerHTML = '<p>Error loading inventory.</p>';
+        console.error('Fetch error:', error);
+      }
     }
 
     function renderProducts(products) {
@@ -89,11 +94,11 @@
         card.className = 'card';
 
         const img = document.createElement('img');
-        img.src = product['Image URL'];
+        img.src = product.imageUrl;
 
         const title = document.createElement('div');
         title.className = 'title';
-        title.textContent = product['Product Title'];
+        title.textContent = product.productTitle;
 
         const controls = document.createElement('div');
         controls.className = 'qty-controls';
@@ -104,14 +109,13 @@
         plus.textContent = '+';
         const qty = document.createElement('div');
         qty.className = 'qty';
-        qty.textContent = product['Quantity'] || 0;
+        qty.textContent = product.quantity ?? 0;
 
         const status = document.createElement('div');
         status.className = 'status';
-        status.textContent = '';
 
-        minus.onclick = () => updateQty(product['Product Title'], qty, -1, status);
-        plus.onclick = () => updateQty(product['Product Title'], qty, 1, status);
+        minus.onclick = () => updateQty(product.productTitle, qty, -1, status);
+        plus.onclick = () => updateQty(product.productTitle, qty, 1, status);
 
         controls.appendChild(minus);
         controls.appendChild(qty);
@@ -127,7 +131,8 @@
     }
 
     async function updateQty(title, qtyElem, delta, statusElem) {
-      let newQty = parseFloat(qtyElem.textContent) + delta;
+      const currentQty = parseInt(qtyElem.textContent);
+      const newQty = currentQty + delta;
       if (newQty < 0) return;
 
       const payload = {
@@ -136,20 +141,26 @@
         action: delta > 0 ? 'Increment' : 'Decrement'
       };
 
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify(payload),
-        headers: { 'Content-Type': 'application/json' }
-      });
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const result = await res.json();
 
-      const result = await res.text();
-      if (result === 'Success') {
-        qtyElem.textContent = newQty;
-        statusElem.textContent = 'Updated ✓';
-        setTimeout(() => statusElem.textContent = '', 1500);
-      } else {
-        statusElem.textContent = 'Error!';
+        if (result.success) {
+          qtyElem.textContent = newQty;
+          statusElem.textContent = 'Updated ✓';
+        } else {
+          statusElem.textContent = `Error: ${result.error || 'unknown'}`;
+        }
+      } catch (err) {
+        statusElem.textContent = 'Network error';
+        console.error('POST error:', err);
       }
+
+      setTimeout(() => statusElem.textContent = '', 2000);
     }
 
     fetchInventory();
