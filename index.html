@@ -3,130 +3,81 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Designated West Inventory</title>
+  <title>Designated Drinks: Jeff's Inventory</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
   <style>
-    body {
-      font-family: sans-serif;
-      background: #f9f9f9;
-      margin: 0;
-      padding: 1rem;
-    }
-    .product-card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      padding: 1rem;
-      margin-bottom: 1rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-    .product-card img {
-      max-width: 100px;
-      margin-bottom: 0.5rem;
-    }
-    .product-title {
-      font-weight: bold;
-      margin-bottom: 0.5rem;
-    }
-    .inventory-count {
-      color: green;
-      font-size: 1.1rem;
-      margin-bottom: 0.5rem;
-    }
-    .controls {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.5rem;
-    }
-    .controls button {
-      padding: 0.5rem;
-      font-size: 1.2rem;
-    }
-    .controls input {
-      width: 50px;
-      text-align: center;
-      font-size: 1rem;
-    }
-    .action-select {
-      margin-bottom: 0.5rem;
-    }
-    .submit-btn {
-      background: #007bff;
-      color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+    body { font-family: 'Montserrat', sans-serif; background: #f2f5f9; margin: 0; padding: 0; }
+    header { background: #001f3f; color: white; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 20px; }
+    .card { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 16px; text-align: center; }
+    .card img { max-width: 100%; height: 160px; object-fit: contain; margin-bottom: 10px; }
+    .title { font-weight: bold; margin: 10px 0; }
+    .pack { color: #666; margin-bottom: 8px; }
+    .qty-control { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 12px; }
+    button { background: #001f3f; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 16px; cursor: pointer; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    .qty { font-size: 18px; min-width: 30px; display: inline-block; }
   </style>
 </head>
 <body>
-  <h1>Designated West Inventory</h1>
-  <div id="products"></div>
+  <header>Designated Drinks – Jeff's Inventory Dashboard</header>
+  <div class="grid" id="inventory"></div>
 
   <script>
-    const sheetData = [
-      {
-        title: "Bellwoods IPA",
-        image: "https://link.to/image1.jpg",
-        currentQty: 6
-      },
-      {
-        title: "Sober Carpenter Pale Ale",
-        image: "https://link.to/image2.jpg",
-        currentQty: 0
-      }
-    ];
+    const SHEET_ID = "2PACX-1vSksiAb8hlzv8gWhInVml4v4-dRWImeRpVFHzTz89dQ3RV0Os9X_yh7WgCUucSCkm23sPYPjbI1Mo4U";
+    const API_KEY = "AIzaSyChxr03Juok8dPH4jRvHAHjoj06IFZkl0g";
+    const RANGE_STATIC = "Western Canada Inventory!A2:G";
+    const RANGE_DYNAMIC = "Jeff Inventory!A2:C";
 
-    const container = document.getElementById('products');
-
-    sheetData.forEach((product, index) => {
-      const card = document.createElement('div');
-      card.className = 'product-card';
-      card.innerHTML = `
-        <img src="${product.image}" alt="${product.title}" />
-        <div class="product-title">${product.title}</div>
-        <div class="inventory-count">${product.currentQty} cases on hand</div>
-        <div class="controls">
-          <button onclick="decrease(${index})">–</button>
-          <input type="number" id="qty-${index}" value="0" />
-          <button onclick="increase(${index})">+</button>
-        </div>
-        <select id="action-${index}" class="action-select">
-          <option value="Shipped">Shipped</option>
-          <option value="Received">Received</option>
-        </select>
-        <button class="submit-btn" onclick="submit(${index})">Submit</button>
-      `;
-      container.appendChild(card);
-    });
-
-    function increase(i) {
-      const input = document.getElementById(`qty-${i}`);
-      input.value = parseInt(input.value) + 1;
+    async function fetchSheet(range) {
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(range)}?key=${API_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      return data.values || [];
     }
 
-    function decrease(i) {
-      const input = document.getElementById(`qty-${i}`);
-      if (parseInt(input.value) > 0) {
-        input.value = parseInt(input.value) - 1;
-      }
+    function updateSheet(title, newQty) {
+      // Placeholder: Google Sheets write logic via Apps Script or backend endpoint needed
+      alert(`Inventory for "${title}" would be updated to ${newQty}. (Write access coming soon)`);
     }
 
-    function submit(i) {
-      const qty = parseInt(document.getElementById(`qty-${i}`).value);
-      const action = document.getElementById(`action-${i}`).value;
-      const product = sheetData[i].title;
-      if (qty > 0) {
-        alert(`${action} ${qty} case(s) of ${product}`);
-        // TODO: Send data to Apps Script endpoint
-      } else {
-        alert("Please enter a quantity greater than 0.");
-      }
+    async function loadInventory() {
+      const staticData = await fetchSheet(RANGE_STATIC);
+      const dynamicData = await fetchSheet(RANGE_DYNAMIC);
+      const dynamicMap = Object.fromEntries(dynamicData.map(row => [row[0], row[1]]));
+
+      const container = document.getElementById("inventory");
+      container.innerHTML = "";
+
+      staticData.forEach(row => {
+        const [title, packSize, retail, wholesale, imageUrl, price24, status] = row;
+        if ((status || '').toLowerCase() !== 'yes') return;
+        const qty = parseInt(dynamicMap[title] || "0", 10);
+
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <img src="${imageUrl}" alt="${title}" />
+          <div class="title">${title}</div>
+          <div class="pack">${packSize}</div>
+          <div class="qty-control">
+            <button onclick="changeQty('${title}', ${qty - 1})">−</button>
+            <div class="qty" id="qty-${btoa(title)}">${qty}</div>
+            <button onclick="changeQty('${title}', ${qty + 1})">+</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
     }
+
+    function changeQty(title, newQty) {
+      const encoded = btoa(title);
+      const qtyDiv = document.getElementById(`qty-${encoded}`);
+      qtyDiv.innerText = newQty;
+      updateSheet(title, newQty);
+    }
+
+    loadInventory();
   </script>
 </body>
 </html>
