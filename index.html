@@ -39,12 +39,13 @@
 
     async function updateSheet(title, newQty) {
       try {
-        await fetch(WEBHOOK_URL, {
+        const response = await fetch(WEBHOOK_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ title, qty: newQty })
         });
-        console.log(`✅ Updated ${title} to ${newQty}`);
+        const result = await response.text();
+        console.log("✅", result);
       } catch (err) {
         console.error("❌ Failed to update inventory:", err);
       }
