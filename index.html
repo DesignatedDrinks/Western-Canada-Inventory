@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Designated West Inventory</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 1rem;
+    }
+    .product-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .product-card img {
+      max-width: 100px;
+      margin-bottom: 0.5rem;
+    }
+    .product-title {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    .inventory-count {
+      color: green;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .controls button {
+      padding: 0.5rem;
+      font-size: 1.2rem;
+    }
+    .controls input {
+      width: 50px;
+      text-align: center;
+      font-size: 1rem;
+    }
+    .action-select {
+      margin-bottom: 0.5rem;
+    }
+    .submit-btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Designated West Inventory</h1>
+  <div id="products"></div>
+
+  <script>
+    const sheetData = [
+      {
+        title: "Bellwoods IPA",
+        image: "https://link.to/image1.jpg",
+        currentQty: 6
+      },
+      {
+        title: "Sober Carpenter Pale Ale",
+        image: "https://link.to/image2.jpg",
+        currentQty: 0
+      }
+    ];
+
+    const container = document.getElementById('products');
+
+    sheetData.forEach((product, index) => {
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.innerHTML = `
+        <img src="${product.image}" alt="${product.title}" />
+        <div class="product-title">${product.title}</div>
+        <div class="inventory-count">${product.currentQty} cases on hand</div>
+        <div class="controls">
+          <button onclick="decrease(${index})">–</button>
+          <input type="number" id="qty-${index}" value="0" />
+          <button onclick="increase(${index})">+</button>
+        </div>
+        <select id="action-${index}" class="action-select">
+          <option value="Shipped">Shipped</option>
+          <option value="Received">Received</option>
+        </select>
+        <button class="submit-btn" onclick="submit(${index})">Submit</button>
+      `;
+      container.appendChild(card);
+    });
+
+    function increase(i) {
+      const input = document.getElementById(`qty-${i}`);
+      input.value = parseInt(input.value) + 1;
+    }
+
+    function decrease(i) {
+      const input = document.getElementById(`qty-${i}`);
+      if (parseInt(input.value) > 0) {
+        input.value = parseInt(input.value) - 1;
+      }
+    }
+
+    function submit(i) {
+      const qty = parseInt(document.getElementById(`qty-${i}`).value);
+      const action = document.getElementById(`action-${i}`).value;
+      const product = sheetData[i].title;
+      if (qty > 0) {
+        alert(`${action} ${qty} case(s) of ${product}`);
+        // TODO: Send data to Apps Script endpoint
+      } else {
+        alert("Please enter a quantity greater than 0.");
+      }
+    }
+  </script>
+</body>
+</html>
