@@ -3,91 +3,156 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Designated Drinks: Jeff's Inventory</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
+  <title>Designated Drinks Western Inventory</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Montserrat', sans-serif; background: #f2f5f9; margin: 0; padding: 0; }
-    header { background: #001f3f; color: white; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 20px; }
-    .card { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 16px; text-align: center; }
-    .card img { max-width: 100%; height: 160px; object-fit: contain; margin-bottom: 10px; }
-    .title { font-weight: bold; margin: 10px 0; }
-    .pack { color: #666; margin-bottom: 8px; }
-    .qty-control { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 12px; }
-    button { background: #001f3f; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 16px; cursor: pointer; }
-    button:disabled { background: #ccc; cursor: not-allowed; }
-    .qty { font-size: 18px; min-width: 30px; display: inline-block; }
+    body {
+      font-family: 'Montserrat', sans-serif;
+      margin: 0;
+      background: #f9f9f9;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #001f3f;
+      margin-bottom: 20px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: white;
+      padding: 15px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    .card img {
+      max-width: 100%;
+      height: 140px;
+      object-fit: contain;
+      margin-bottom: 10px;
+    }
+    .title {
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    .qty-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 10px;
+    }
+    button {
+      background-color: #001f3f;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .qty {
+      margin: 0 10px;
+      font-size: 16px;
+      min-width: 30px;
+    }
+    .status {
+      margin-top: 10px;
+      font-size: 12px;
+      color: green;
+    }
   </style>
 </head>
 <body>
-  <header>Designated Drinks – Jeff's Inventory Dashboard</header>
-  <div class="grid" id="inventory"></div>
+  <h1>Designated Drinks – Western Inventory</h1>
+  <div class="grid" id="productGrid"></div>
 
   <script>
-    const SHEET_ID = "177OyfU6g2jc8FqdPyzk5tw-tcEwlUvsVgPdr80rDGVU";
-    const API_KEY = "AIzaSyChxr03Juok8dPH4jRvHAHjoj06IFZkl0g";
-    const RANGE_STATIC = "'Western Canada Inventory'!A2:G";
-    const RANGE_DYNAMIC = "'Jeff Inventory'!A2:C";
-    const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzHImw8Eys9k8MKon8xChWGUpXM14SOAJeyki5veRE_0COkIl-KKbV4IDJ41S_RlSBbFw/exec";
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyE5WZG0nUnrDLL0HfROliIdvWVRynC3nt-bWt6eTlvZP-InbhxsxBCtZWyM9BsM7Gz-Q/exec';
 
-    async function fetchSheet(range) {
-      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(range)}?key=${API_KEY}`;
-      const res = await fetch(url);
-      const data = await res.json();
-      return data.values || [];
+    async function fetchInventory() {
+      const res = await fetch(API_URL);
+      const products = await res.json();
+      renderProducts(products.sort((a, b) => a['Product Title'].localeCompare(b['Product Title'])));
     }
 
-    async function updateSheet(title, newQty) {
-      try {
-        const response = await fetch(WEBHOOK_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, qty: newQty })
-        });
-        const result = await response.text();
-        console.log("✅", result);
-      } catch (err) {
-        console.error("❌ Failed to update inventory:", err);
-      }
-    }
+    function renderProducts(products) {
+      const grid = document.getElementById('productGrid');
+      grid.innerHTML = '';
 
-    async function loadInventory() {
-      const staticData = await fetchSheet(RANGE_STATIC);
-      const dynamicData = await fetchSheet(RANGE_DYNAMIC);
-      const dynamicMap = Object.fromEntries(dynamicData.map(row => [row[0], row[1]]));
+      products.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'card';
 
-      const container = document.getElementById("inventory");
-      container.innerHTML = "";
+        const img = document.createElement('img');
+        img.src = product['Image URL'];
 
-      staticData.forEach(row => {
-        const [title, packSize, retail, wholesale, imageUrl, price24, status] = row;
-        if ((status || '').toLowerCase() !== 'yes') return;
-        const qty = parseInt(dynamicMap[title] || "0", 10);
+        const title = document.createElement('div');
+        title.className = 'title';
+        title.textContent = product['Product Title'];
 
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
-          <img src="${imageUrl}" alt="${title}" />
-          <div class="title">${title}</div>
-          <div class="pack">${packSize}</div>
-          <div class="qty-control">
-            <button onclick="changeQty('${title}', ${qty - 1})">−</button>
-            <div class="qty" id="qty-${btoa(title)}">${qty}</div>
-            <button onclick="changeQty('${title}', ${qty + 1})">+</button>
-          </div>
-        `;
-        container.appendChild(card);
+        const controls = document.createElement('div');
+        controls.className = 'qty-controls';
+
+        const minus = document.createElement('button');
+        minus.textContent = '-';
+        const plus = document.createElement('button');
+        plus.textContent = '+';
+        const qty = document.createElement('div');
+        qty.className = 'qty';
+        qty.textContent = product['Quantity'] || 0;
+
+        const status = document.createElement('div');
+        status.className = 'status';
+        status.textContent = '';
+
+        minus.onclick = () => updateQty(product['Product Title'], qty, -1, status);
+        plus.onclick = () => updateQty(product['Product Title'], qty, 1, status);
+
+        controls.appendChild(minus);
+        controls.appendChild(qty);
+        controls.appendChild(plus);
+
+        card.appendChild(img);
+        card.appendChild(title);
+        card.appendChild(controls);
+        card.appendChild(status);
+
+        grid.appendChild(card);
       });
     }
 
-    function changeQty(title, newQty) {
-      const encoded = btoa(title);
-      const qtyDiv = document.getElementById(`qty-${encoded}`);
-      qtyDiv.innerText = newQty;
-      updateSheet(title, newQty);
+    async function updateQty(title, qtyElem, delta, statusElem) {
+      let newQty = parseFloat(qtyElem.textContent) + delta;
+      if (newQty < 0) return;
+
+      const payload = {
+        productTitle: title,
+        newQty: newQty,
+        action: delta > 0 ? 'Increment' : 'Decrement'
+      };
+
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const result = await res.text();
+      if (result === 'Success') {
+        qtyElem.textContent = newQty;
+        statusElem.textContent = 'Updated ✓';
+        setTimeout(() => statusElem.textContent = '', 1500);
+      } else {
+        statusElem.textContent = 'Error!';
+      }
     }
 
-    loadInventory();
+    fetchInventory();
   </script>
 </body>
 </html>
