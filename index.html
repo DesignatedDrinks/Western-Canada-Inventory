@@ -28,6 +28,7 @@
     const API_KEY = "AIzaSyChxr03Juok8dPH4jRvHAHjoj06IFZkl0g";
     const RANGE_STATIC = "Western Canada Inventory!A2:G";
     const RANGE_DYNAMIC = "Jeff Inventory!A2:C";
+    const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzHImw8Eys9k8MKon8xChWGUpXM14SOAJeyki5veRE_0COkIl-KKbV4IDJ41S_RlSBbFw/exec";
 
     async function fetchSheet(range) {
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(range)}?key=${API_KEY}`;
@@ -36,9 +37,17 @@
       return data.values || [];
     }
 
-    function updateSheet(title, newQty) {
-      // Placeholder: Google Sheets write logic via Apps Script or backend endpoint needed
-      alert(`Inventory for "${title}" would be updated to ${newQty}. (Write access coming soon)`);
+    async function updateSheet(title, newQty) {
+      try {
+        await fetch(WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, qty: newQty })
+        });
+        console.log(`✅ Updated ${title} to ${newQty}`);
+      } catch (err) {
+        console.error("❌ Failed to update inventory:", err);
+      }
     }
 
     async function loadInventory() {
