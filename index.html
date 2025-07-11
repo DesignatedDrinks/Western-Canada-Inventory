@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Designated Drinks Western Inventory</title>
+  <title>Designated Drinks – Western Inventory</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
@@ -78,10 +78,10 @@
       try {
         const res = await fetch(API_URL);
         const products = await res.json();
-        renderProducts(products.sort((a, b) => a.productTitle.localeCompare(b.productTitle)));
-      } catch (error) {
-        document.getElementById('productGrid').innerHTML = '<p>Error loading inventory.</p>';
-        console.error('Fetch error:', error);
+        renderProducts(products.sort((a, b) => a['Product Title'].localeCompare(b['Product Title'])));
+      } catch (err) {
+        alert('Failed to load inventory.');
+        console.error(err);
       }
     }
 
@@ -94,11 +94,11 @@
         card.className = 'card';
 
         const img = document.createElement('img');
-        img.src = product.imageUrl;
+        img.src = product['Image URL'];
 
         const title = document.createElement('div');
         title.className = 'title';
-        title.textContent = product.productTitle;
+        title.textContent = product['Product Title'];
 
         const controls = document.createElement('div');
         controls.className = 'qty-controls';
@@ -109,13 +109,13 @@
         plus.textContent = '+';
         const qty = document.createElement('div');
         qty.className = 'qty';
-        qty.textContent = product.quantity ?? 0;
+        qty.textContent = product['Quantity'] || 0;
 
         const status = document.createElement('div');
         status.className = 'status';
 
-        minus.onclick = () => updateQty(product.productTitle, qty, -1, status);
-        plus.onclick = () => updateQty(product.productTitle, qty, 1, status);
+        minus.onclick = () => updateQty(product['Product Title'], parseInt(qty.textContent), -1, qty, status);
+        plus.onclick = () => updateQty(product['Product Title'], parseInt(qty.textContent), 1, qty, status);
 
         controls.appendChild(minus);
         controls.appendChild(qty);
@@ -130,8 +130,7 @@
       });
     }
 
-    async function updateQty(title, qtyElem, delta, statusElem) {
-      const currentQty = parseInt(qtyElem.textContent);
+    async function updateQty(title, currentQty, delta, qtyElem, statusElem) {
       const newQty = currentQty + delta;
       if (newQty < 0) return;
 
@@ -144,23 +143,25 @@
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
-          body: JSON.stringify(payload),
-          headers: { 'Content-Type': 'application/json' }
+          mode: 'cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
         });
-        const result = await res.json();
 
+        const result = await res.json();
         if (result.success) {
           qtyElem.textContent = newQty;
           statusElem.textContent = 'Updated ✓';
         } else {
-          statusElem.textContent = `Error: ${result.error || 'unknown'}`;
+          statusElem.textContent = 'Update failed';
         }
+
       } catch (err) {
         statusElem.textContent = 'Network error';
-        console.error('POST error:', err);
+        console.error(err);
       }
 
-      setTimeout(() => statusElem.textContent = '', 2000);
+      setTimeout(() => { statusElem.textContent = ''; }, 2000);
     }
 
     fetchInventory();
