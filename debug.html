@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sheets API Debugger</title>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #f9f9f9; }
+    pre { background: #fff; border: 1px solid #ccc; padding: 16px; overflow: auto; }
+  </style>
+</head>
+<body>
+  <h2>📦 Sheets API Debugger</h2>
+  <p>If you're seeing data below, your API key and sheet are working correctly.</p>
+  <pre id="output">Loading...</pre>
+
+  <script>
+    const SHEET_ID = "2PACX-1vSksiAb8hlzv8gWhInVml4v4-dRWImeRpVFHzTz89dQ3RV0Os9X_yh7WgCUucSCkm23sPYPjbI1Mo4U";
+    const API_KEY = "AIzaSyChxr03Juok8dPH4jRvHAHjoj06IFZkl0g";
+    const RANGE = "Western Canada Inventory!A2:G";
+    const endpoint = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(RANGE)}?key=${API_KEY}`;
+
+    fetch(endpoint)
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+      })
+      .catch(err => {
+        document.getElementById("output").textContent = "Error:\n" + err;
+      });
+  </script>
+</body>
+</html>
