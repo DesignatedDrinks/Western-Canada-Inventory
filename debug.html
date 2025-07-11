@@ -16,7 +16,8 @@
   <script>
     const SHEET_ID = "177OyfU6g2jc8FqdPyzk5tw-tcEwlUvsVgPdr80rDGVU";
     const API_KEY = "AIzaSyChxr03Juok8dPH4jRvHAHjoj06IFZkl0g";
-    const RANGE = "Western Canada Inventory!A2:G";
+    const RANGE = "'Western Canada Inventory'!A2:G";
+
     const endpoint = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(RANGE)}?key=${API_KEY}`;
 
     fetch(endpoint)
@@ -25,7 +26,7 @@
         document.getElementById("output").textContent = JSON.stringify(data, null, 2);
       })
       .catch(err => {
-        document.getElementById("output").textContent = "Error:\n" + err;
+        document.getElementById("output").textContent = "Error:\\n" + err;
       });
   </script>
 </body>
