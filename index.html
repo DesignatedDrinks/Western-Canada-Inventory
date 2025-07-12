@@ -3,166 +3,124 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Designated Drinks Western Inventory</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <title>Western Canada Inventory</title>
   <style>
     body {
-      font-family: 'Montserrat', sans-serif;
+      font-family: Arial, sans-serif;
+      background: #f8f8f8;
       margin: 0;
-      background: #f4f4f4;
       padding: 20px;
     }
-    h1 {
-      text-align: center;
-      color: #001f3f;
-      margin-bottom: 20px;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 20px;
-    }
-    .card {
+    .product {
+      display: flex;
+      align-items: center;
       background: white;
-      padding: 15px;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      text-align: center;
+      margin-bottom: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
-    .card img {
-      max-width: 100%;
-      height: 140px;
-      object-fit: contain;
-      margin-bottom: 10px;
+    .product img {
+      width: 80px;
+      height: auto;
+      margin-right: 20px;
+    }
+    .info {
+      flex-grow: 1;
     }
     .title {
-      font-weight: 700;
-      font-size: 14px;
-      margin-bottom: 10px;
+      font-weight: bold;
     }
-    .qty-controls {
+    .controls {
       display: flex;
-      justify-content: center;
       align-items: center;
-      margin-top: 10px;
     }
-    button {
-      background-color: #001f3f;
-      color: white;
-      border: none;
-      padding: 5px 10px;
+    .controls button {
+      padding: 6px 10px;
       font-size: 16px;
-      border-radius: 8px;
-      cursor: pointer;
+      margin: 0 5px;
     }
     .qty {
-      margin: 0 10px;
-      font-size: 16px;
-      min-width: 30px;
-    }
-    .status {
-      margin-top: 10px;
-      font-size: 12px;
-      color: green;
+      width: 40px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <h1>Designated Drinks – Western Inventory</h1>
-  <div class="grid" id="productGrid"></div>
+  <h1>Western Canada Inventory</h1>
+  <div id="inventory"></div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbyE5WZG0nUnrDLL0HfROliIdvWVRynC3nt-bWt6eTlvZP-InbhxsxBCtZWyM9BsM7Gz-Q/exec';
+    const endpoint = 'https://script.google.com/macros/s/AKfycbyE5WZG0nUnrDLL0HfROliIdvWVRynC3nt-bWt6eTlvZP-InbhxsxBCtZWyM9BsM7Gz-Q/exec';
 
-    async function fetchInventory() {
-      try {
-        const res = await fetch(API_URL);
-        const products = await res.json();
-        renderProducts(products.sort((a, b) => a['Product Title'].localeCompare(b['Product Title'])));
-      } catch (err) {
-        alert("Failed to load inventory. Please try again later.");
-        console.error(err);
-      }
-    }
+    async function loadInventory() {
+      const res = await fetch(endpoint);
+      const items = await res.json();
 
-    function renderProducts(products) {
-      const grid = document.getElementById('productGrid');
-      grid.innerHTML = '';
+      const container = document.getElementById('inventory');
+      container.innerHTML = '';
 
-      products.forEach(product => {
-        const card = document.createElement('div');
-        card.className = 'card';
+      items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'product';
 
         const img = document.createElement('img');
-        img.src = product['Image URL'] || '';
-        img.alt = product['Product Title'];
+        img.src = item['Image URL'];
+        img.alt = item['Product Title'];
 
-        const title = document.createElement('div');
-        title.className = 'title';
-        title.textContent = product['Product Title'];
+        const info = document.createElement('div');
+        info.className = 'info';
+        info.innerHTML = `<div class="title">${item['Product Title']}</div>
+                          <div>Qty: <span class="qty" id="qty-${item['Product Title']}">${item['Quantity'] || 0}</span></div>`;
 
         const controls = document.createElement('div');
-        controls.className = 'qty-controls';
+        controls.className = 'controls';
 
-        const minus = document.createElement('button');
-        minus.textContent = '-';
-        const plus = document.createElement('button');
-        plus.textContent = '+';
-        const qty = document.createElement('div');
-        qty.className = 'qty';
-        qty.textContent = product['Quantity'] || 0;
+        const minusBtn = document.createElement('button');
+        minusBtn.textContent = '-';
+        minusBtn.onclick = () => updateQty(item['Product Title'], -1);
 
-        const status = document.createElement('div');
-        status.className = 'status';
+        const plusBtn = document.createElement('button');
+        plusBtn.textContent = '+';
+        plusBtn.onclick = () => updateQty(item['Product Title'], 1);
 
-        minus.onclick = () => updateQty(product['Product Title'], parseInt(qty.textContent), -1, qty, status);
-        plus.onclick = () => updateQty(product['Product Title'], parseInt(qty.textContent), 1, qty, status);
+        controls.appendChild(minusBtn);
+        controls.appendChild(plusBtn);
 
-        controls.appendChild(minus);
-        controls.appendChild(qty);
-        controls.appendChild(plus);
+        div.appendChild(img);
+        div.appendChild(info);
+        div.appendChild(controls);
 
-        card.appendChild(img);
-        card.appendChild(title);
-        card.appendChild(controls);
-        card.appendChild(status);
-
-        grid.appendChild(card);
+        container.appendChild(div);
       });
     }
 
-    async function updateQty(title, currentQty, delta, qtyElem, statusElem) {
-      const newQty = currentQty + delta;
-      if (newQty < 0) return;
+    async function updateQty(productTitle, change) {
+      const qtySpan = document.getElementById(`qty-${productTitle}`);
+      const current = parseInt(qtySpan.textContent) || 0;
+      const newQty = current + change;
 
-      const payload = {
-        productTitle: title,
-        newQty: newQty,
-        action: delta > 0 ? 'Increment' : 'Decrement'
+      qtySpan.textContent = newQty;
+
+      const body = {
+        productTitle,
+        newQty,
+        action: change > 0 ? 'Increment' : 'Decrement'
       };
 
       try {
-        const res = await fetch(API_URL, {
+        await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(body)
         });
-
-        const result = await res.text();
-        if (result === 'Success') {
-          qtyElem.textContent = newQty;
-          statusElem.textContent = 'Updated ✓';
-          setTimeout(() => statusElem.textContent = '', 1500);
-        } else {
-          statusElem.textContent = 'Error!';
-        }
       } catch (err) {
-        console.error(err);
-        statusElem.textContent = 'Network Error';
+        console.error('POST failed:', err);
+        alert('Error saving to backend.');
       }
     }
 
-    fetchInventory();
+    loadInventory();
   </script>
 </body>
 </html>
