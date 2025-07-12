@@ -6,7 +6,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; background: #f4f6f8; color: #222; }
-    h1 { text-align: center; color: #001f3f; margin-bottom: 8px; }
+    header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      min-height: 48px;
+      /* For small screens: keep logo and center heading */
+      justify-content: flex-start;
+      gap: 10px;
+    }
+    .logo {
+      height: 38px;
+      width: auto;
+      display: block;
+      margin-right: 12px;
+    }
+    @media (max-width: 420px) {
+      .logo { height: 30px; margin-right: 8px; }
+      h1 { font-size: 1.23rem; }
+    }
+    h1 { 
+      text-align: center; 
+      color: #001f3f; 
+      margin-bottom: 8px; 
+      flex: 1;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1.15;
+    }
     #searchbar { display:block; margin: 0 auto 18px auto; width:100%; max-width:430px; padding:10px 14px; border-radius:8px; border:1px solid #ddd; font-size:18px; }
     .table { max-width:600px; margin:0 auto; border-radius:12px; background:#fff; box-shadow:0 2px 12px rgba(0,0,0,0.04); overflow:hidden;}
     table { width:100%; border-collapse:collapse; }
@@ -60,7 +88,10 @@
   </style>
 </head>
 <body>
-  <h1>Western Canada<br>Inventory</h1>
+  <header>
+    <img class="logo" src=https://www.designateddrinks.ca/cdn/shop/files/DDWebLogo_150x.png?v=1648823188 alt="Designated Drinks Logo">
+    <h1>Western Canada<br>Inventory</h1>
+  </header>
   <input id="searchbar" type="text" placeholder="Search product name...">
   <div id="loading"><span>Loading inventory...</span></div>
   <div class="table" id="product-table" style="display:none;">
