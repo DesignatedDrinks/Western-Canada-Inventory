@@ -11,31 +11,32 @@
       align-items: center;
       justify-content: center;
       margin-bottom: 0;
-      min-height: 65px;
+      min-height: 50px;
       gap: 18px;
       position: relative;
     }
     .logo {
-      height: 54px;
+      height: 70px;
       width: auto;
       display: block;
       position: absolute;
       left: 0;
-      top: 6px;
-      margin-left: 8px;
+      top: 1px;
+      margin-left: 5px;
+      z-index: 2;
     }
     @media (max-width: 600px) {
-      header { min-height: 40px; }
-      .logo { height: 45px; margin-left: 0; }
+      header { min-height: 36px; }
+      .logo { height: 70px; margin-left: 0; top: 1px; }
     }
     h1 { 
       text-align: center; 
       color: #001f3f; 
-      margin: 0 auto 8px auto; 
-      font-size: 2rem;
+      margin: 0 auto 12px auto; 
+      font-size: 1.35rem;
       font-weight: 700;
       letter-spacing: -1px;
-      line-height: 1.18;
+      line-height: 1.07;
       width: 100%;
     }
     #searchbar { 
@@ -50,75 +51,98 @@
       box-sizing: border-box;
       text-align: center;
     }
-    .table { max-width:600px; margin:0 auto; border-radius:12px; background:#fff; box-shadow:0 2px 12px rgba(0,0,0,0.04); overflow:hidden;}
-    table { width:100%; border-collapse:collapse; }
-    th, td { padding:14px 6px; text-align:left; }
-    th { background:#f4f6f8; font-weight:600; color:#001f3f; }
-    tr { border-bottom:1px solid #f0f0f0; }
-    .prod-name { cursor:pointer; color:#001f3f; font-weight:500; }
-    .prod-name:hover, .prod-name:active { text-decoration:underline; color:#0051a5; }
-    .inventory { text-align:center; font-size:18px; }
-    #loading { text-align:center; margin-top: 50px; font-size:20px; }
-    /* Modal */
-    #modal { display:none; position:fixed; z-index:10; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.33); justify-content:center; align-items:flex-start; }
-    #modal-content {
-      background:white;
-      border-radius:14px;
-      padding:12px 7px 10px 7px;
-      width:97vw;
-      max-width:290px;
-      box-shadow:0 6px 32px rgba(0,0,0,0.22);
-      text-align:center;
-      position:relative;
-      animation:popin .17s;
-      margin-top:3vh;
-      max-height:280px;
-      overflow-y:auto;
+    /* Collapsible Brewery */
+    .brewery-section {
+      max-width: 600px;
+      margin: 0 auto 7px auto;
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+      overflow: hidden;
+      margin-bottom: 12px;
     }
-    #modal-img { max-width:70px; margin-bottom:8px; }
-    #modal-title { font-size:13px; font-weight:bold; margin-bottom:9px; color:#001f3f; }
-    #modal-qty { width:42px; font-size:16px; border-radius:5px; border:1px solid #eee; margin:0 5px;}
-    #modal-minus, #modal-plus { font-size:19px; padding:6px 12px; }
-    #modal-save { margin-top:12px; background:#001f3f; color:white; font-size:15px; padding:6px 18px; border:none; border-radius:7px;}
-    #modal-close { position:absolute;top:7px;right:12px;cursor:pointer;font-size:30px;line-height:1;color:#001f3f;}
-    @keyframes popin { from { transform: scale(0.92); opacity:0; } to { transform: scale(1); opacity:1; } }
+    .brewery-header {
+      cursor: pointer;
+      background: #eaf0fa;
+      color: #001f3f;
+      padding: 13px 18px 13px 16px;
+      font-size: 1.04rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #e4e9ef;
+    }
+    .brewery-header .arrow {
+      margin-right: 10px;
+      font-size: 16px;
+      transition: transform 0.22s;
+    }
+    .brewery-header.collapsed .arrow {
+      transform: rotate(-90deg);
+    }
+    .product-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 17px;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 16px;
+      background: #fff;
+    }
+    .product-row:last-child { border-bottom: none; }
+    .prod-name { cursor: pointer; color: #001f3f; font-weight: 500; }
+    .prod-name:hover, .prod-name:active { text-decoration: underline; color: #0051a5; }
+    .inventory { text-align: center; font-size: 18px; }
+    #loading { text-align: center; margin-top: 50px; font-size: 20px; }
+    /* Modal */
+    #modal { display: none; position: fixed; z-index: 10; left: 0; top: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.33); justify-content: center; align-items: flex-start; }
+    #modal-content {
+      background: white;
+      border-radius: 14px;
+      padding: 12px 7px 10px 7px;
+      width: 97vw;
+      max-width: 290px;
+      box-shadow: 0 6px 32px rgba(0,0,0,0.22);
+      text-align: center;
+      position: relative;
+      animation: popin .17s;
+      margin-top: 3vh;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    #modal-img { max-width: 70px; margin-bottom: 8px; }
+    #modal-title { font-size: 13px; font-weight: bold; margin-bottom: 9px; color: #001f3f; }
+    #modal-qty { width: 42px; font-size: 16px; border-radius: 5px; border: 1px solid #eee; margin: 0 5px;}
+    #modal-minus, #modal-plus { font-size: 19px; padding: 6px 12px; }
+    #modal-save { margin-top: 12px; background: #001f3f; color: white; font-size: 15px; padding: 6px 18px; border: none; border-radius: 7px;}
+    #modal-close { position: absolute;top: 7px;right: 12px;cursor: pointer;font-size: 30px;line-height: 1;color: #001f3f;}
+    @keyframes popin { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     /* Spinner */
-    #spinner { display:none; position:fixed; z-index:100; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.10); justify-content:center; align-items:center;}
-    #spinner .lds-dual-ring { display:inline-block;width:68px;height:68px;}
-    #spinner .lds-dual-ring:after { content:" "; display:block;width:46px;height:46px;margin:1px;border-radius:50%;border:6px solid #001f3f;border-color:#001f3f transparent #001f3f transparent;animation:lds-dual-ring 1.1s linear infinite;}
-    @keyframes lds-dual-ring { 0% { transform:rotate(0deg);} 100% {transform:rotate(360deg);} }
+    #spinner { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.10); justify-content: center; align-items: center;}
+    #spinner .lds-dual-ring { display: inline-block; width: 68px; height: 68px;}
+    #spinner .lds-dual-ring:after { content:" "; display: block; width: 46px; height: 46px; margin: 1px; border-radius: 50%; border: 6px solid #001f3f; border-color: #001f3f transparent #001f3f transparent; animation: lds-dual-ring 1.1s linear infinite;}
+    @keyframes lds-dual-ring { 0% { transform: rotate(0deg);} 100% {transform: rotate(360deg);} }
     @media (min-width:601px) {
       #modal-content {
-        margin-top:0;
-        max-height:none;
-        padding:28px 16px 24px 16px;
-        max-width:370px;
+        margin-top: 0;
+        max-height: none;
+        padding: 28px 16px 24px 16px;
+        max-width: 370px;
       }
-      #modal-img { max-width:160px; }
-      #modal-title { font-size:18px; }
-      th, td { padding:14px 10px; font-size:16px;}
-      #searchbar {font-size:17px;}
+      #modal-img { max-width: 160px; }
+      #modal-title { font-size: 18px; }
+      #searchbar {font-size: 17px;}
     }
   </style>
 </head>
 <body>
   <header>
-    <img class="logo" src=https://www.designateddrinks.ca/cdn/shop/files/DDWebLogo_150x.png?v=1648823188 alt="Designated Drinks Logo">
+    <img class="logo" src="https://www.designateddrinks.ca/cdn/shop/files/DDWebLogo_150x.png?v=1648823188" alt="Designated Drinks Logo">
     <h1>Western Canada<br>Inventory</h1>
   </header>
   <input id="searchbar" type="text" placeholder="Search product name...">
   <div id="loading"><span>Loading inventory...</span></div>
-  <div class="table" id="product-table" style="display:none;">
-    <table>
-      <thead>
-        <tr>
-          <th>Product Name</th>
-          <th>Inventory</th>
-        </tr>
-      </thead>
-      <tbody id="table-body"></tbody>
-    </table>
-  </div>
+  <div id="brewery-list"></div>
 
   <!-- Modal for editing qty -->
   <div id="modal">
@@ -143,31 +167,68 @@
     let allProducts = [];
     let filteredProducts = [];
     let currentModalProduct = null;
+    let expandedBreweries = {};
+
+    function getBreweryName(productTitle) {
+      // Extract brewery name from product title by taking text up to first ')' or '-'
+      let match = productTitle.match(/^(.*?)(\(|-)/);
+      return match ? match[1].trim() : productTitle.split(' ')[0];
+    }
 
     // Spinner functions
     function showSpinner() { document.getElementById('spinner').style.display = 'flex'; }
     function hideSpinner() { document.getElementById('spinner').style.display = 'none'; }
 
-    // Render table
-    function renderTable(products) {
-      const tbody = document.getElementById('table-body');
-      tbody.innerHTML = '';
+    // Render collapsible brewery sections
+    function renderBreweryList(products) {
+      // Group by brewery
+      let breweries = {};
       products.forEach(product => {
-        const tr = document.createElement('tr');
-        // Product name (clickable)
-        const nameTd = document.createElement('td');
-        nameTd.textContent = product['Product Title'];
-        nameTd.className = 'prod-name';
-        nameTd.onclick = () => showModal(product);
+        let brewery = getBreweryName(product['Product Title']);
+        if (!breweries[brewery]) breweries[brewery] = [];
+        breweries[brewery].push(product);
+      });
 
-        // Inventory qty
-        const qtyTd = document.createElement('td');
-        qtyTd.className = 'inventory';
-        qtyTd.textContent = product['Quantity'] || 0;
+      // Sort brewery names
+      const sortedBreweries = Object.keys(breweries).sort();
+      const container = document.getElementById('brewery-list');
+      container.innerHTML = '';
 
-        tr.appendChild(nameTd);
-        tr.appendChild(qtyTd);
-        tbody.appendChild(tr);
+      sortedBreweries.forEach(brewery => {
+        // Brewery Header
+        const section = document.createElement('div');
+        section.className = 'brewery-section';
+        const header = document.createElement('div');
+        header.className = 'brewery-header';
+        if (!expandedBreweries[brewery]) header.classList.add('collapsed');
+        header.innerHTML = `<span class="arrow">${expandedBreweries[brewery] ? '▼' : '▶'}</span>${brewery}`;
+        header.onclick = () => {
+          expandedBreweries[brewery] = !expandedBreweries[brewery];
+          renderBreweryList(filteredProducts.length ? filteredProducts : allProducts);
+        };
+        section.appendChild(header);
+
+        // Product List
+        const prodContainer = document.createElement('div');
+        prodContainer.style.display = expandedBreweries[brewery] ? 'block' : 'none';
+        breweries[brewery].forEach(product => {
+          const row = document.createElement('div');
+          row.className = 'product-row';
+          // Product Name
+          const nameDiv = document.createElement('div');
+          nameDiv.textContent = product['Product Title'];
+          nameDiv.className = 'prod-name';
+          nameDiv.onclick = () => showModal(product);
+          // Inventory
+          const invDiv = document.createElement('div');
+          invDiv.className = 'inventory';
+          invDiv.textContent = product['Quantity'] || 0;
+          row.appendChild(nameDiv);
+          row.appendChild(invDiv);
+          prodContainer.appendChild(row);
+        });
+        section.appendChild(prodContainer);
+        container.appendChild(section);
       });
     }
 
@@ -210,11 +271,18 @@
     document.getElementById('searchbar').addEventListener('input', function() {
       const term = this.value.trim().toLowerCase();
       if (!term) {
-        filteredProducts = allProducts.slice();
+        filteredProducts = [];
+        expandedBreweries = {};
       } else {
         filteredProducts = allProducts.filter(p => (p['Product Title']||'').toLowerCase().includes(term));
+        // Expand all breweries that match
+        expandedBreweries = {};
+        filteredProducts.forEach(p => {
+          let brewery = getBreweryName(p['Product Title']);
+          expandedBreweries[brewery] = true;
+        });
       }
-      renderTable(filteredProducts);
+      renderBreweryList(filteredProducts.length ? filteredProducts : allProducts);
     });
 
     async function fetchInventory() {
@@ -245,8 +313,7 @@
         const result = await res.text();
         if (result.startsWith("Success")) {
           product['Quantity'] = newQty;
-          // update in-memory and filtered view
-          renderTable(filteredProducts);
+          renderBreweryList(filteredProducts.length ? filteredProducts : allProducts);
         } else {
           alert('Update failed: ' + result);
         }
@@ -258,9 +325,9 @@
     // Initial load
     fetchInventory().then(products => {
       allProducts = products;
-      filteredProducts = products.slice();
-      renderTable(products);
-      document.getElementById('product-table').style.display = 'block';
+      filteredProducts = [];
+      renderBreweryList(products);
+      document.getElementById('loading').style.display = 'none';
     });
   </script>
 </body>
