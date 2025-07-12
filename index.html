@@ -1,126 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Western Canada Inventory</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f8f8f8;
+      font-family: 'Segoe UI', sans-serif;
       margin: 0;
       padding: 20px;
+      background: #f4f6f8;
+      color: #333;
     }
-    .product {
-      display: flex;
-      align-items: center;
+    h1 {
+      text-align: center;
+      color: #001f3f;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .card {
       background: white;
-      margin-bottom: 12px;
-      padding: 12px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    .product img {
-      width: 80px;
+    .card img {
+      width: 100%;
+      max-width: 150px;
       height: auto;
-      margin-right: 20px;
-    }
-    .info {
-      flex-grow: 1;
+      margin-bottom: 12px;
     }
     .title {
       font-weight: bold;
+      text-align: center;
+      margin-bottom: 8px;
     }
-    .controls {
+    .qty-controls {
       display: flex;
+      justify-content: center;
       align-items: center;
+      gap: 10px;
+      margin-top: 12px;
     }
-    .controls button {
-      padding: 6px 10px;
-      font-size: 16px;
-      margin: 0 5px;
+    button {
+      font-size: 18px;
+      padding: 6px 12px;
+      cursor: pointer;
+      border: none;
+      border-radius: 6px;
+      background-color: #001f3f;
+      color: white;
     }
     .qty {
-      width: 40px;
+      font-size: 16px;
+      min-width: 30px;
       text-align: center;
     }
   </style>
 </head>
 <body>
   <h1>Western Canada Inventory</h1>
-  <div id="inventory"></div>
+  <div class="grid" id="inventory"></div>
 
   <script>
-    const endpoint = 'https://script.google.com/macros/s/AKfycbyE5WZG0nUnrDLL0HfROliIdvWVRynC3nt-bWt6eTlvZP-InbhxsxBCtZWyM9BsM7Gz-Q/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyE5WZG0nUnrDLL0HfROliIdvWVRynC3nt-bWt6eTlvZP-InbhxsxBCtZWyM9BsM7Gz-Q/exec';
 
-    async function loadInventory() {
-      const res = await fetch(endpoint);
-      const items = await res.json();
+    async function fetchInventory() {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      return data;
+    }
 
-      const container = document.getElementById('inventory');
-      container.innerHTML = '';
+    function renderProducts(products) {
+      const grid = document.getElementById('inventory');
+      grid.innerHTML = '';
 
-      items.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'product';
+      products.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'card';
 
         const img = document.createElement('img');
-        img.src = item['Image URL'];
-        img.alt = item['Product Title'];
+        img.src = product['Image URL'];
+        img.alt = product['Product Title'];
 
-        const info = document.createElement('div');
-        info.className = 'info';
-        info.innerHTML = `<div class="title">${item['Product Title']}</div>
-                          <div>Qty: <span class="qty" id="qty-${item['Product Title']}">${item['Quantity'] || 0}</span></div>`;
+        const title = document.createElement('div');
+        title.className = 'title';
+        title.textContent = product['Product Title'];
 
-        const controls = document.createElement('div');
-        controls.className = 'controls';
+        const qtyControls = document.createElement('div');
+        qtyControls.className = 'qty-controls';
 
         const minusBtn = document.createElement('button');
         minusBtn.textContent = '-';
-        minusBtn.onclick = () => updateQty(item['Product Title'], -1);
+
+        const qtyDisplay = document.createElement('div');
+        qtyDisplay.className = 'qty';
+        qtyDisplay.textContent = product['Quantity'] || 0;
 
         const plusBtn = document.createElement('button');
         plusBtn.textContent = '+';
-        plusBtn.onclick = () => updateQty(item['Product Title'], 1);
 
-        controls.appendChild(minusBtn);
-        controls.appendChild(plusBtn);
+        plusBtn.onclick = () => updateQty(product, parseInt(product['Quantity'] || 0) + 1);
+        minusBtn.onclick = () => updateQty(product, Math.max(0, parseInt(product['Quantity'] || 0) - 1));
 
-        div.appendChild(img);
-        div.appendChild(info);
-        div.appendChild(controls);
-
-        container.appendChild(div);
+        qtyControls.append(minusBtn, qtyDisplay, plusBtn);
+        card.append(img, title, qtyControls);
+        grid.appendChild(card);
       });
     }
 
-    async function updateQty(productTitle, change) {
-      const qtySpan = document.getElementById(`qty-${productTitle}`);
-      const current = parseInt(qtySpan.textContent) || 0;
-      const newQty = current + change;
-
-      qtySpan.textContent = newQty;
-
-      const body = {
-        productTitle,
-        newQty,
-        action: change > 0 ? 'Increment' : 'Decrement'
+    async function updateQty(product, newQty) {
+      const payload = {
+        productTitle: product['Product Title'],
+        newQty: newQty,
+        action: 'Manual Update'
       };
 
       try {
-        await fetch(endpoint, {
+        const res = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
+          body: JSON.stringify(payload)
         });
-      } catch (err) {
-        console.error('POST failed:', err);
-        alert('Error saving to backend.');
+        const result = await res.text();
+        if (result === 'Success') {
+          product['Quantity'] = newQty;
+          renderProducts(await fetchInventory());
+        } else {
+          alert('Update failed');
+        }
+      } catch (error) {
+        console.error(error);
+        alert('Network error');
       }
     }
 
-    loadInventory();
+    fetchInventory().then(renderProducts);
   </script>
 </body>
 </html>
