@@ -6,61 +6,152 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; background: #f4f6f8; color: #333; }
-    h1 { text-align: center; color: #001f3f; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 20px; }
-    .card { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center; }
-    .card img { width: 100%; max-width: 150px; height: auto; margin-bottom: 12px; }
-    .title { font-weight: bold; text-align: center; margin-bottom: 8px; }
-    .qty-controls { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 12px; }
-    button { font-size: 18px; padding: 6px 12px; cursor: pointer; border: none; border-radius: 6px; background-color: #001f3f; color: white; }
+    h1 { text-align: center; color: #001f3f; margin-top: 8px; margin-bottom: 14px; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 10px; }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 14px 10px 20px 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: box-shadow .18s;
+    }
+    .card:active, .card:focus-within { box-shadow: 0 6px 32px rgba(0,0,0,0.14); }
+    .card img { width: 100%; max-width: 130px; height: auto; margin-bottom: 10px; background:#f4f6f8; border-radius:9px;}
+    .title {
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 5px;
+      font-size: 15px;
+      cursor: pointer;
+      color: #001f3f;
+      transition: color .12s;
+    }
+    .title:active, .title:hover { color: #006edc; }
+    .qty-controls { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 10px; }
+    button { font-size: 18px; padding: 6px 16px; cursor: pointer; border: none; border-radius: 6px; background-color: #001f3f; color: white; }
     .qty { font-size: 16px; min-width: 30px; text-align: center; }
-    .error { color: red; text-align: center; margin-top: 20px; }
+    #loading { text-align:center; margin-top:60px; }
+    @media (min-width: 601px) {
+      .grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+      .card { padding: 16px 12px 22px 12px; }
+      .title { font-size: 17px; }
+      .card img { max-width: 160px;}
+    }
+    /* Modal styles */
+    #modal { display:none; position:fixed; z-index:10; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.33); justify-content:center; align-items:center; }
+    #modal-content {
+      background:white;
+      border-radius:14px;
+      padding:28px 16px 24px 16px;
+      width:92vw;
+      max-width:380px;
+      box-shadow:0 6px 32px rgba(0,0,0,0.22);
+      text-align:center;
+      position:relative;
+      animation:popin .19s;
+    }
+    @keyframes popin { from { transform: scale(0.92); opacity:0; } to { transform: scale(1); opacity:1; } }
+    #modal-close { position:absolute;top:10px;right:18px;cursor:pointer;font-size:34px;line-height:1;color:#001f3f;}
+    #modal-img { max-width:160px;margin-bottom:14px; }
+    #modal-title { font-size:17px;font-weight:bold;margin-bottom:13px;color:#001f3f;}
+    #modal-qty { width:60px;font-size:20px;text-align:center; border-radius:7px; border:1px solid #eee; margin:0 7px;}
+    #modal-save {margin-top:18px;background:#001f3f;color:white;font-size:18px;padding:8px 40px;border:none;border-radius:7px;}
+    #loadmore { margin: 18px auto 0 auto; display: block; }
   </style>
 </head>
 <body>
-  <h1>Western Canada Inventory</h1>
+  <h1>Western Canada<br>Inventory</h1>
+  <div id="loading"><span>Loading inventory...</span></div>
   <div class="grid" id="inventory"></div>
-  <div class="error" id="error"></div>
+
+  <!-- Modal for editing qty -->
+  <div id="modal">
+    <div id="modal-content">
+      <span id="modal-close">&times;</span>
+      <img id="modal-img" src="" alt="">
+      <div id="modal-title"></div>
+      <div style="display:flex;justify-content:center;align-items:center;gap:12px;margin-bottom:10px;">
+        <button id="modal-minus" style="font-size:26px;padding:8px 16px;">-</button>
+        <input id="modal-qty" type="number" min="0" value="0">
+        <button id="modal-plus" style="font-size:26px;padding:8px 16px;">+</button>
+      </div>
+      <button id="modal-save">Save</button>
+    </div>
+  </div>
+
   <script>
     const API_URL = 'https://script.google.com/macros/s/AKfycbyE5WZG0nUnrDLL0HfROliIdvWVRynC3nt-bWt6eTlvZP-InbhxsxBCtZWyM9BsM7Gz-Q/exec';
 
+    let allProducts = [];
+    let loadedCount = 0;
+    const BATCH_SIZE = 20;
+    let isLoading = false;
 
-    async function fetchInventory() {
-      try {
-        const res = await fetch(API_URL);
-        if (!res.ok) throw new Error("Failed to fetch inventory");
-        const data = await res.json();
-        document.getElementById('error').textContent = '';
-        return data;
-      } catch (error) {
-        document.getElementById('error').textContent = "Unable to load inventory. Try again later.";
-        return [];
-      }
+    // Modal stuff
+    let currentModalProduct = null;
+
+    // Modal logic
+    function showModal(product) {
+      currentModalProduct = product;
+      document.getElementById('modal-img').src = product['Image URL'];
+      document.getElementById('modal-img').alt = product['Product Title'];
+      document.getElementById('modal-title').textContent = product['Product Title'];
+      document.getElementById('modal-qty').value = product['Quantity'] || 0;
+      document.getElementById('modal').style.display = 'flex';
+      document.getElementById('modal-qty').focus();
     }
+    function hideModal() { document.getElementById('modal').style.display = 'none'; }
+    document.getElementById('modal-close').onclick = hideModal;
+    document.getElementById('modal').onclick = function(e) {
+      if (e.target === document.getElementById('modal')) hideModal();
+    };
+    document.getElementById('modal-minus').onclick = function() {
+      let qty = Math.max(0, parseInt(document.getElementById('modal-qty').value) - 1);
+      document.getElementById('modal-qty').value = qty;
+    };
+    document.getElementById('modal-plus').onclick = function() {
+      let qty = parseInt(document.getElementById('modal-qty').value) + 1;
+      document.getElementById('modal-qty').value = qty;
+    };
+    document.getElementById('modal-save').onclick = async function() {
+      const newQty = parseInt(document.getElementById('modal-qty').value);
+      if (isNaN(newQty) || newQty < 0) { alert('Invalid quantity'); return; }
+      await updateQty(currentModalProduct, newQty);
+      hideModal();
+    };
 
-    function renderProducts(products) {
+    // Lazy load images, batch "Load More"
+    function renderProducts(products, append = false) {
       const grid = document.getElementById('inventory');
-      grid.innerHTML = '';
-      products.forEach(product => {
+      if (!append) {
+        grid.innerHTML = '';
+        loadedCount = 0;
+      }
+
+      const batch = products.slice(loadedCount, loadedCount + BATCH_SIZE);
+      batch.forEach(product => {
         const card = document.createElement('div');
         card.className = 'card';
 
         const img = document.createElement('img');
         img.src = product['Image URL'];
         img.alt = product['Product Title'];
-        img.onerror = () => { img.src = 'https://via.placeholder.com/150?text=No+Image'; };
+        img.loading = 'lazy';
 
         const title = document.createElement('div');
         title.className = 'title';
         title.textContent = product['Product Title'];
+        title.onclick = () => showModal(product);
 
         const qtyControls = document.createElement('div');
         qtyControls.className = 'qty-controls';
 
         const minusBtn = document.createElement('button');
         minusBtn.textContent = '-';
-        minusBtn.setAttribute('aria-label', 'Decrease quantity for ' + product['Product Title']);
-        minusBtn.disabled = false;
+        minusBtn.onclick = () => updateQty(product, Math.max(0, parseInt(product['Quantity'] || 0) - 1));
 
         const qtyDisplay = document.createElement('div');
         qtyDisplay.className = 'qty';
@@ -68,25 +159,38 @@
 
         const plusBtn = document.createElement('button');
         plusBtn.textContent = '+';
-        plusBtn.setAttribute('aria-label', 'Increase quantity for ' + product['Product Title']);
-        plusBtn.disabled = false;
-
-        // Disable UI during update to prevent double-submit
-        plusBtn.onclick = async () => {
-          plusBtn.disabled = minusBtn.disabled = true;
-          await updateQty(product, Number(product['Quantity'] || 0) + 1);
-          plusBtn.disabled = minusBtn.disabled = false;
-        };
-        minusBtn.onclick = async () => {
-          minusBtn.disabled = plusBtn.disabled = true;
-          await updateQty(product, Math.max(0, Number(product['Quantity'] || 0) - 1));
-          minusBtn.disabled = plusBtn.disabled = false;
-        };
+        plusBtn.onclick = () => updateQty(product, parseInt(product['Quantity'] || 0) + 1);
 
         qtyControls.append(minusBtn, qtyDisplay, plusBtn);
         card.append(img, title, qtyControls);
         grid.appendChild(card);
       });
+
+      loadedCount += batch.length;
+
+      // Load more button
+      if (loadedCount < products.length) {
+        let btn = document.createElement('button');
+        btn.textContent = 'Load More';
+        btn.id = 'loadmore';
+        btn.onclick = () => renderProducts(allProducts, true);
+        grid.appendChild(btn);
+      }
+    }
+
+    async function fetchInventory() {
+      document.getElementById('loading').style.display = 'block';
+      isLoading = true;
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        document.getElementById('loading').style.display = 'none';
+        isLoading = false;
+        return data;
+      } catch (e) {
+        document.getElementById('loading').innerHTML = '<span>Unable to load inventory. Try again later.</span>';
+        return [];
+      }
     }
 
     async function updateQty(product, newQty) {
@@ -96,24 +200,32 @@
         action: 'Manual Update'
       };
       try {
+        // Show spinner
+        if (!isLoading) document.getElementById('loading').style.display = 'block';
         const res = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain' },
           body: JSON.stringify(payload)
         });
         const result = await res.text();
+        // Update in-memory model, update UI
         if (result.startsWith("Success")) {
-          renderProducts(await fetchInventory());
+          product['Quantity'] = newQty;
+          renderProducts(allProducts.slice(0, loadedCount)); // update visible products only
         } else {
           alert('Update failed: ' + result);
         }
       } catch (error) {
         alert('Network error');
       }
+      document.getElementById('loading').style.display = 'none';
     }
 
     // Initial load
-    fetchInventory().then(renderProducts);
+    fetchInventory().then(products => {
+      allProducts = products;
+      renderProducts(products);
+    });
   </script>
 </body>
 </html>
