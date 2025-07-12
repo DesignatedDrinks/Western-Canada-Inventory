@@ -5,83 +5,41 @@
   <title>Western Canada Inventory</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 20px;
-      background: #f4f6f8;
-      color: #333;
-    }
-    h1 {
-      text-align: center;
-      color: #001f3f;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 16px;
-      margin-top: 20px;
-    }
-    .card {
-      background: white;
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .card img {
-      width: 100%;
-      max-width: 150px;
-      height: auto;
-      margin-bottom: 12px;
-    }
-    .title {
-      font-weight: bold;
-      text-align: center;
-      margin-bottom: 8px;
-    }
-    .qty-controls {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-      margin-top: 12px;
-    }
-    button {
-      font-size: 18px;
-      padding: 6px 12px;
-      cursor: pointer;
-      border: none;
-      border-radius: 6px;
-      background-color: #001f3f;
-      color: white;
-    }
-    .qty {
-      font-size: 16px;
-      min-width: 30px;
-      text-align: center;
-    }
+    body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; background: #f4f6f8; color: #333; }
+    h1 { text-align: center; color: #001f3f; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 20px; }
+    .card { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center; }
+    .card img { width: 100%; max-width: 150px; height: auto; margin-bottom: 12px; }
+    .title { font-weight: bold; text-align: center; margin-bottom: 8px; }
+    .qty-controls { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 12px; }
+    button { font-size: 18px; padding: 6px 12px; cursor: pointer; border: none; border-radius: 6px; background-color: #001f3f; color: white; }
+    .qty { font-size: 16px; min-width: 30px; text-align: center; }
+    .error { color: red; text-align: center; margin-top: 20px; }
   </style>
 </head>
 <body>
   <h1>Western Canada Inventory</h1>
   <div class="grid" id="inventory"></div>
-
+  <div class="error" id="error"></div>
   <script>
     const API_URL = 'https://script.google.com/macros/s/AKfycbyE5WZG0nUnrDLL0HfROliIdvWVRynC3nt-bWt6eTlvZP-InbhxsxBCtZWyM9BsM7Gz-Q/exec';
 
     async function fetchInventory() {
-      const res = await fetch(API_URL);
-      const data = await res.json();
-      return data;
+      try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error("Failed to fetch inventory");
+        const data = await res.json();
+        document.getElementById('error').textContent = '';
+        return data;
+      } catch (error) {
+        document.getElementById('error').textContent = "Unable to load inventory. Try again later.";
+        return [];
+      }
     }
 
     function renderProducts(products) {
       const grid = document.getElementById('inventory');
       grid.innerHTML = '';
-
       products.forEach(product => {
         const card = document.createElement('div');
         card.className = 'card';
@@ -89,6 +47,7 @@
         const img = document.createElement('img');
         img.src = product['Image URL'];
         img.alt = product['Product Title'];
+        img.onerror = () => { img.src = 'https://via.placeholder.com/150?text=No+Image'; };
 
         const title = document.createElement('div');
         title.className = 'title';
@@ -99,6 +58,8 @@
 
         const minusBtn = document.createElement('button');
         minusBtn.textContent = '-';
+        minusBtn.setAttribute('aria-label', 'Decrease quantity for ' + product['Product Title']);
+        minusBtn.disabled = false;
 
         const qtyDisplay = document.createElement('div');
         qtyDisplay.className = 'qty';
@@ -106,9 +67,20 @@
 
         const plusBtn = document.createElement('button');
         plusBtn.textContent = '+';
+        plusBtn.setAttribute('aria-label', 'Increase quantity for ' + product['Product Title']);
+        plusBtn.disabled = false;
 
-        plusBtn.onclick = () => updateQty(product, parseInt(product['Quantity'] || 0) + 1);
-        minusBtn.onclick = () => updateQty(product, Math.max(0, parseInt(product['Quantity'] || 0) - 1));
+        // Disable UI during update to prevent double-submit
+        plusBtn.onclick = async () => {
+          plusBtn.disabled = minusBtn.disabled = true;
+          await updateQty(product, Number(product['Quantity'] || 0) + 1);
+          plusBtn.disabled = minusBtn.disabled = false;
+        };
+        minusBtn.onclick = async () => {
+          minusBtn.disabled = plusBtn.disabled = true;
+          await updateQty(product, Math.max(0, Number(product['Quantity'] || 0) - 1));
+          minusBtn.disabled = plusBtn.disabled = false;
+        };
 
         qtyControls.append(minusBtn, qtyDisplay, plusBtn);
         card.append(img, title, qtyControls);
@@ -122,7 +94,6 @@
         newQty: newQty,
         action: 'Manual Update'
       };
-
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
@@ -130,18 +101,17 @@
           body: JSON.stringify(payload)
         });
         const result = await res.text();
-        if (result === 'Success') {
-          product['Quantity'] = newQty;
+        if (result.startsWith("Success")) {
           renderProducts(await fetchInventory());
         } else {
-          alert('Update failed');
+          alert('Update failed: ' + result);
         }
       } catch (error) {
-        console.error(error);
         alert('Network error');
       }
     }
 
+    // Initial load
     fetchInventory().then(renderProducts);
   </script>
 </body>
