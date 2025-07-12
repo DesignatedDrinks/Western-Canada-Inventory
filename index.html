@@ -9,7 +9,7 @@
     body {
       font-family: 'Montserrat', sans-serif;
       margin: 0;
-      background: #f9f9f9;
+      background: #f4f4f4;
       padding: 20px;
     }
     h1 {
@@ -25,8 +25,8 @@
     .card {
       background: white;
       padding: 15px;
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       text-align: center;
     }
     .card img {
@@ -72,15 +72,16 @@
   <div class="grid" id="productGrid"></div>
 
   <script>
-  const API_URL = 'https://script.google.com/macros/s/AKfycbyE5WZG0nUnrDLL0HfROliIdvWVRynC3nt-bWt6eTlvZP-InbhxsxBCtZWyM9BsM7Gz-Q/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyE5WZG0nUnrDLL0HfROliIdvWVRynC3nt-bWt6eTlvZP-InbhxsxBCtZWyM9BsM7Gz-Q/exec';
 
     async function fetchInventory() {
       try {
         const res = await fetch(API_URL);
         const products = await res.json();
         renderProducts(products.sort((a, b) => a['Product Title'].localeCompare(b['Product Title'])));
-      } catch (e) {
-        alert("Error loading inventory: " + e.message);
+      } catch (err) {
+        alert("Failed to load inventory. Please try again later.");
+        console.error(err);
       }
     }
 
@@ -94,7 +95,7 @@
 
         const img = document.createElement('img');
         img.src = product['Image URL'] || '';
-        img.onerror = () => img.style.display = 'none';
+        img.alt = product['Product Title'];
 
         const title = document.createElement('div');
         title.className = 'title';
@@ -114,8 +115,8 @@
         const status = document.createElement('div');
         status.className = 'status';
 
-        minus.onclick = () => updateQty(product['Product Title'], qty, -1, status);
-        plus.onclick = () => updateQty(product['Product Title'], qty, 1, status);
+        minus.onclick = () => updateQty(product['Product Title'], parseInt(qty.textContent), -1, qty, status);
+        plus.onclick = () => updateQty(product['Product Title'], parseInt(qty.textContent), 1, qty, status);
 
         controls.appendChild(minus);
         controls.appendChild(qty);
@@ -130,8 +131,8 @@
       });
     }
 
-    async function updateQty(title, qtyElem, delta, statusElem) {
-      let newQty = parseInt(qtyElem.textContent) + delta;
+    async function updateQty(title, currentQty, delta, qtyElem, statusElem) {
+      const newQty = currentQty + delta;
       if (newQty < 0) return;
 
       const payload = {
@@ -143,9 +144,10 @@
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
-          body: JSON.stringify(payload),
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
         });
+
         const result = await res.text();
         if (result === 'Success') {
           qtyElem.textContent = newQty;
@@ -154,8 +156,9 @@
         } else {
           statusElem.textContent = 'Error!';
         }
-      } catch (e) {
-        statusElem.textContent = 'Network error';
+      } catch (err) {
+        console.error(err);
+        statusElem.textContent = 'Network Error';
       }
     }
 
