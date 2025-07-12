@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <title>Western Canada Inventory</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     body {
@@ -14,121 +12,146 @@
       padding: 0;
       background: #f4f6f8;
       color: #222;
+      min-height: 100vh;
     }
     .navbar {
       display: flex;
       align-items: center;
       justify-content: flex-start;
-      padding: 14px 0 6px 0;
+      padding: 16px 0 6px 0;
       max-width: 700px;
       margin: 0 auto;
+      gap: 16px;
     }
     .logo {
-      margin-left: 18px;
-      margin-right: 16px;
-      width: 60px; /* Bigger logo */
-      height: auto;
+      width: 70px; min-width: 60px; height: auto;
+      margin-left: 12px;
     }
     .app-title {
-      font-size: 2rem;
+      font-size: 1.8rem;
       font-weight: 700;
       color: #112244;
-      line-height: 1.1;
+      line-height: 1.12;
+      text-align: left;
     }
     @media (max-width: 600px) {
-      .logo { width: 62px; margin-left: 6vw; margin-right: 12px; }
-      .app-title { font-size: 1.2rem; }
+      .navbar { gap: 10px; }
+      .logo { width: 62px; margin-left: 5vw; }
+      .app-title { font-size: 1.08rem; }
     }
-    h1 {
-      display: none; /* Hide old h1 */
-    }
+
     #searchbar {
       display: block;
-      margin: 0 auto 16px auto;
+      margin: 0 auto 18px auto;
       width: 95%;
       max-width: 430px;
-      padding: 12px 14px;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      font-size: 17px;
+      padding: 13px 16px;
+      border-radius: 12px;
+      border: 1px solid #e3e3e3;
+      font-size: 18px;
       box-sizing: border-box;
+      background: #fff;
+      font-family: inherit;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.03);
     }
+
     .brewery-group {
-      background: #f5f8fd;
-      border-radius: 16px;
-      margin: 12px auto 14px auto;
+      background: #fafdff;
+      border-radius: 20px;
+      margin: 16px auto 18px auto;
       max-width: 700px;
-      box-shadow: 0 1.5px 8px rgba(90,110,140,0.06);
+      box-shadow: 0 4px 20px rgba(80,110,160,0.05);
+      transition: box-shadow 0.18s;
       padding-bottom: 0.5px;
     }
+
     .brewery-header {
-      font-weight: bold;
-      color: #102850;
-      padding: 18px 16px 18px 12px;
-      font-size: 1.21rem;
       display: flex;
       align-items: center;
-      border-radius: 16px;
-      cursor: pointer;
-      background: #e5edf7;
-      margin-bottom: 0;
+      justify-content: center;
+      width: 100%;
       border: none;
-      transition: background 0.13s;
-      gap: 7px;
+      border-radius: 20px 20px 0 0;
+      padding: 20px 0 20px 0;
+      font-size: 1.21rem;
+      font-weight: 700;
+      background: #e5edf7;
+      color: #142C47;
+      cursor: pointer;
+      transition: background 0.14s;
+      box-shadow: 0 1.5px 12px rgba(80,110,160,0.04);
+      position: relative;
+      letter-spacing: 0.02em;
       user-select: none;
     }
-    .brewery-header:hover, .brewery-header:focus {
-      background: #d8e7fb;
-    }
-    .chevron {
-      font-size: 1.15em;
+    .brewery-header .chevron {
+      position: absolute;
+      left: 18px;
+      font-size: 1.5em;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #254785;
       transition: transform 0.18s;
-      color: #24417c;
-      width: 1.1em;
     }
+    .brewery-header.open .chevron {
+      transform: translateY(-50%) rotate(90deg);
+    }
+    .brewery-header .brewery-title {
+      width: 100%;
+      text-align: center;
+      font-size: 1.18em;
+      font-weight: 700;
+      pointer-events: none;
+      letter-spacing: 0.01em;
+    }
+    .brewery-header:active, .brewery-header:focus {
+      background: #dbe6f5;
+    }
+
     .brewery-body {
-      padding: 0 0 0 0;
-      background: white;
-      border-radius: 0 0 16px 16px;
-      overflow: hidden;
+      background: #fff;
+      border-radius: 0 0 20px 20px;
       margin-top: 0;
+      padding: 0 0 10px 0;
+      box-shadow: none;
     }
+
     .prod-row {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       border-bottom: 1px solid #f0f0f0;
-      padding: 14px 10px 14px 17px;
-      font-size: 1.04rem;
+      padding: 14px 12px 14px 16px;
+      font-size: 1.09rem;
+      min-height: 48px;
       cursor: pointer;
       transition: background 0.13s;
+      border-radius: 9px;
+      background: none;
+      margin: 0 5px;
     }
-    .prod-row:last-child {
-      border-bottom: none;
-    }
+    .prod-row:last-child { border-bottom: none; }
     .prod-name {
       flex: 1;
       font-weight: 400;
       color: #223366;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      text-align: left;
+      overflow-wrap: break-word;
+      white-space: normal;
+      line-height: 1.2;
+      padding-right: 7px;
     }
     .prod-qty {
-      font-size: 1.4em;
-      font-weight: 600;
-      margin-left: 20px;
+      font-size: 1.5em;
+      font-weight: 700;
+      margin-left: 25px;
       text-align: right;
-      min-width: 24px;
+      min-width: 32px;
       display: inline-block;
       letter-spacing: 1px;
       transition: color 0.2s;
+      color: #17439a;
     }
-    .prod-qty.zero {
-      color: #d93025;
-    }
-    /* Modal (unchanged, left out for brevity if not using) */
+    .prod-qty.zero { color: #e14b36; }
+
     #loading {
       text-align: center;
       margin-top: 32px;
@@ -175,7 +198,7 @@
         // Header
         const header = document.createElement('button');
         header.type = 'button';
-        header.className = 'brewery-header';
+        header.className = 'brewery-header' + (isOpen ? ' open' : '');
         header.tabIndex = 0;
         header.onclick = () => {
           expandedBreweries[brewery] = !expandedBreweries[brewery];
@@ -184,13 +207,12 @@
 
         const chevron = document.createElement('span');
         chevron.className = 'chevron';
-        chevron.innerHTML = isOpen ? '▼' : '▲';
-        if (isOpen) chevron.style.transform = 'rotate(0deg)';
-        else chevron.style.transform = 'rotate(180deg)';
+        chevron.innerHTML = '▶'; // Right chevron
         header.appendChild(chevron);
 
         const title = document.createElement('span');
-        title.textContent = ' ' + brewery;
+        title.className = 'brewery-title';
+        title.textContent = brewery;
         header.appendChild(title);
         groupDiv.appendChild(header);
 
@@ -247,11 +269,11 @@
       }
     }
 
-    // Initial load
+    // Initial load: All breweries collapsed
     fetchInventory().then(products => {
       allProducts = products;
       filteredProducts = [];
-      expandedBreweries = {}; // <-- ALL collapsed on load
+      expandedBreweries = {}; // ALL collapsed on load
       renderBreweryList(products);
     });
   </script>
