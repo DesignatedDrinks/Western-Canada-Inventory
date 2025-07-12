@@ -5,322 +5,184 @@
   <title>Western Canada Inventory</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      background: #f4f6f8;
-      color: #222;
-      font-family: 'Segoe UI', Arial, sans-serif;
+    body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; background: #f4f6f8; color: #222; }
+    h1 { text-align: center; color: #001f3f; margin-bottom: 8px; }
+    #searchbar { display:block; margin: 0 auto 18px auto; width:100%; max-width:430px; padding:10px 14px; border-radius:8px; border:1px solid #ddd; font-size:18px; }
+    .table { max-width:600px; margin:0 auto; border-radius:12px; background:#fff; box-shadow:0 2px 12px rgba(0,0,0,0.04); overflow:hidden;}
+    table { width:100%; border-collapse:collapse; }
+    th, td { padding:14px 6px; text-align:left; }
+    th { background:#f4f6f8; font-weight:600; color:#001f3f; }
+    tr { border-bottom:1px solid #f0f0f0; }
+    .prod-name { cursor:pointer; color:#001f3f; font-weight:500; }
+    .prod-name:hover, .prod-name:active { text-decoration:underline; color:#0051a5; }
+    .inventory { text-align:center; font-size:18px; }
+    #loading { text-align:center; margin-top: 50px; font-size:20px; }
+    /* Modal */
+    #modal { display:none; position:fixed; z-index:10; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.33); justify-content:center; align-items:flex-start; }
+    #modal-content {
+      background:white;
+      border-radius:14px;
+      padding:12px 7px 10px 7px;
+      width:97vw;
+      max-width:290px;
+      box-shadow:0 6px 32px rgba(0,0,0,0.22);
+      text-align:center;
+      position:relative;
+      animation:popin .17s;
+      margin-top:3vh;
+      max-height:280px;
+      overflow-y:auto;
     }
-    body {
-      min-height: 100vh;
+    #modal-img { max-width:70px; margin-bottom:8px; }
+    #modal-title { font-size:13px; font-weight:bold; margin-bottom:9px; color:#001f3f; }
+    #modal-qty { width:42px; font-size:16px; border-radius:5px; border:1px solid #eee; margin:0 5px;}
+    #modal-minus, #modal-plus { font-size:19px; padding:6px 12px; }
+    #modal-save { margin-top:12px; background:#001f3f; color:white; font-size:15px; padding:6px 18px; border:none; border-radius:7px;}
+    #modal-close { position:absolute;top:7px;right:12px;cursor:pointer;font-size:30px;line-height:1;color:#001f3f;}
+    @keyframes popin { from { transform: scale(0.92); opacity:0; } to { transform: scale(1); opacity:1; } }
+    /* Spinner */
+    #spinner { display:none; position:fixed; z-index:100; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.10); justify-content:center; align-items:center;}
+    #spinner .lds-dual-ring { display:inline-block;width:68px;height:68px;}
+    #spinner .lds-dual-ring:after { content:" "; display:block;width:46px;height:46px;margin:1px;border-radius:50%;border:6px solid #001f3f;border-color:#001f3f transparent #001f3f transparent;animation:lds-dual-ring 1.1s linear infinite;}
+    @keyframes lds-dual-ring { 0% { transform:rotate(0deg);} 100% {transform:rotate(360deg);} }
+    @media (min-width:601px) {
+      #modal-content {
+        margin-top:0;
+        max-height:none;
+        padding:28px 16px 24px 16px;
+        max-width:370px;
+      }
+      #modal-img { max-width:160px; }
+      #modal-title { font-size:18px; }
+      th, td { padding:14px 10px; font-size:16px;}
+      #searchbar {font-size:17px;}
     }
-    h1 {
-      margin: 40px 0 18px 0;
-      text-align: center;
-      font-size: 2.1rem;
-      color: #062248;
-      letter-spacing: -.5px;
-      font-weight: 700;
-      line-height: 1.1;
-    }
-    .search-bar {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 18px;
-    }
-    .search-bar input {
-      font-size: 1.1rem;
-      width: 94vw;
-      max-width: 460px;
-      padding: 13px 16px;
-      border: 1.5px solid #cfd8dc;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-      outline: none;
-      margin: 0 auto;
-      display: block;
-    }
-    .product-list {
-      margin: 0 auto;
-      width: 97vw;
-      max-width: 480px;
-    }
-    .product-card {
-      background: #fff;
-      border-radius: 16px;
-      margin-bottom: 15px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-      padding: 18px 18px 12px 18px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      transition: box-shadow 0.13s;
-      border: none;
-    }
-    .product-card:active, .product-card:hover {
-      box-shadow: 0 4px 18px rgba(14,40,90,0.07);
-    }
-    .product-title {
-      width: 100%;
-      font-size: 1.1rem;
-      font-weight: 600;
-      text-align: center;
-      margin-bottom: 5px;
-      color: #0e2d5d;
-      word-break: break-word;
-    }
-    .product-qty {
-      width: 100%;
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: #1a2c49;
-      letter-spacing: 1px;
-    }
-    /* MODAL */
-    .modal-backdrop {
-      position: fixed;
-      z-index: 10;
-      left: 0; top: 0; right: 0; bottom: 0;
-      background: rgba(32,38,53,0.30);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      transition: background .1s;
-    }
-    .modal {
-      background: #fff;
-      border-radius: 24px;
-      box-shadow: 0 10px 32px rgba(0,0,0,0.09);
-      max-width: 360px;
-      width: 92vw;
-      padding: 26px 20px 20px 20px;
-      text-align: center;
-      position: relative;
-      animation: popup 0.21s;
-    }
-    @keyframes popup {
-      from { transform: scale(0.91); opacity: 0.6; }
-      to { transform: scale(1); opacity: 1; }
-    }
-    .modal-close {
-      position: absolute;
-      right: 20px;
-      top: 17px;
-      font-size: 1.6rem;
-      color: #244a78;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0;
-      z-index: 12;
-    }
-    .modal-image {
-      width: 90px;
-      height: 90px;
-      object-fit: contain;
-      margin-bottom: 15px;
-      margin-top: 5px;
-    }
-    .modal-title {
-      font-size: 1.08rem;
-      font-weight: 700;
-      margin-bottom: 19px;
-      color: #0e2d5d;
-      text-align: center;
-      word-break: break-word;
-    }
-    .modal-qty-controls {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 13px;
-      margin-bottom: 18px;
-    }
-    .modal-qty-btn {
-      font-size: 1.5rem;
-      background: #f3f6fb;
-      color: #0e2d5d;
-      border: none;
-      border-radius: 10px;
-      width: 46px;
-      height: 46px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.1s;
-    }
-    .modal-qty-btn:active { background: #dde9fb; }
-    .modal-qty-input {
-      font-size: 1.5rem;
-      width: 70px;
-      text-align: center;
-      border: 2px solid #dae3ee;
-      border-radius: 9px;
-      padding: 7px 0;
-      margin: 0 3px;
-    }
-    .modal-save-btn {
-      margin-top: 0px;
-      width: 100%;
-      padding: 14px 0;
-      background: #062248;
-      color: #fff;
-      border: none;
-      border-radius: 13px;
-      font-size: 1.2rem;
-      font-weight: 700;
-      cursor: pointer;
-      letter-spacing: .5px;
-      transition: background 0.12s;
-    }
-    .modal-save-btn:active { background: #1c3d65; }
-    .spinner {
-      border: 4px solid #e6e9ef;
-      border-top: 4px solid #0e2d5d;
-      border-radius: 50%;
-      width: 38px;
-      height: 38px;
-      animation: spin 0.6s linear infinite;
-      margin: 16px auto 6px auto;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg);}
-      100% { transform: rotate(360deg);}
-    }
-    @media (max-width: 550px) {
-      h1 { font-size: 1.22rem; }
-      .search-bar input { font-size: 1rem; }
-      .modal { max-width: 99vw; }
-    }
-    /* Hide scroll bar on mobile, just a little cleaner */
-    ::-webkit-scrollbar { display: none; }
-    body { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
 <body>
   <h1>Western Canada<br>Inventory</h1>
-  <div class="search-bar">
-    <input id="searchInput" type="text" placeholder="Search product name..." autocomplete="off">
+  <input id="searchbar" type="text" placeholder="Search product name...">
+  <div id="loading"><span>Loading inventory...</span></div>
+  <div class="table" id="product-table" style="display:none;">
+    <table>
+      <thead>
+        <tr>
+          <th>Product Name</th>
+          <th>Inventory</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
   </div>
-  <div class="product-list" id="productList"></div>
 
-  <!-- Modal is injected by JS -->
+  <!-- Modal for editing qty -->
+  <div id="modal">
+    <div id="modal-content">
+      <span id="modal-close">&times;</span>
+      <img id="modal-img" src="" alt="">
+      <div id="modal-title"></div>
+      <div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-bottom:7px;">
+        <button id="modal-minus" style="font-size:19px;padding:6px 12px;">-</button>
+        <input id="modal-qty" type="number" min="0" value="0">
+        <button id="modal-plus" style="font-size:19px;padding:6px 12px;">+</button>
+      </div>
+      <button id="modal-save">Save</button>
+    </div>
+  </div>
+  <!-- Spinner overlay -->
+  <div id="spinner"><div class="lds-dual-ring"></div></div>
 
   <script>
     const API_URL = 'https://script.google.com/macros/s/AKfycbyE5WZG0nUnrDLL0HfROliIdvWVRynC3nt-bWt6eTlvZP-InbhxsxBCtZWyM9BsM7Gz-Q/exec';
-    let inventory = [];
-    let searchTimeout = null;
+
+    let allProducts = [];
+    let filteredProducts = [];
+    let currentModalProduct = null;
+
+    // Spinner functions
+    function showSpinner() { document.getElementById('spinner').style.display = 'flex'; }
+    function hideSpinner() { document.getElementById('spinner').style.display = 'none'; }
+
+    // Render table
+    function renderTable(products) {
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
+      products.forEach(product => {
+        const tr = document.createElement('tr');
+        // Product name (clickable)
+        const nameTd = document.createElement('td');
+        nameTd.textContent = product['Product Title'];
+        nameTd.className = 'prod-name';
+        nameTd.onclick = () => showModal(product);
+
+        // Inventory qty
+        const qtyTd = document.createElement('td');
+        qtyTd.className = 'inventory';
+        qtyTd.textContent = product['Quantity'] || 0;
+
+        tr.appendChild(nameTd);
+        tr.appendChild(qtyTd);
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Modal logic
+    function showModal(product) {
+      currentModalProduct = product;
+      document.getElementById('modal-img').src = product['Image URL'];
+      document.getElementById('modal-img').alt = product['Product Title'];
+      document.getElementById('modal-title').textContent = product['Product Title'];
+      document.getElementById('modal-qty').value = product['Quantity'] || 0;
+      document.getElementById('modal').style.display = 'flex';
+      document.getElementById('modal-qty').focus();
+      setTimeout(() => {
+        document.getElementById('modal-content').scrollIntoView({behavior:'smooth', block:'start'});
+      }, 50);
+    }
+    function hideModal() { document.getElementById('modal').style.display = 'none'; }
+    document.getElementById('modal-close').onclick = hideModal;
+    document.getElementById('modal').onclick = function(e) {
+      if (e.target === document.getElementById('modal')) hideModal();
+    };
+    document.getElementById('modal-minus').onclick = function() {
+      let qty = Math.max(0, parseInt(document.getElementById('modal-qty').value) - 1);
+      document.getElementById('modal-qty').value = qty;
+    };
+    document.getElementById('modal-plus').onclick = function() {
+      let qty = parseInt(document.getElementById('modal-qty').value) + 1;
+      document.getElementById('modal-qty').value = qty;
+    };
+    document.getElementById('modal-save').onclick = async function() {
+      const newQty = parseInt(document.getElementById('modal-qty').value);
+      if (isNaN(newQty) || newQty < 0) { alert('Invalid quantity'); return; }
+      showSpinner();
+      await updateQty(currentModalProduct, newQty);
+      hideSpinner();
+      hideModal();
+    };
+
+    // Filtering/search
+    document.getElementById('searchbar').addEventListener('input', function() {
+      const term = this.value.trim().toLowerCase();
+      if (!term) {
+        filteredProducts = allProducts.slice();
+      } else {
+        filteredProducts = allProducts.filter(p => (p['Product Title']||'').toLowerCase().includes(term));
+      }
+      renderTable(filteredProducts);
+    });
 
     async function fetchInventory() {
-      const res = await fetch(API_URL);
-      return await res.json();
-    }
-
-    function renderProductList(list) {
-      const productList = document.getElementById('productList');
-      productList.innerHTML = '';
-      for (const product of list) {
-        const card = document.createElement('div');
-        card.className = 'product-card';
-        card.onclick = () => openModal(product);
-        // Card content
-        const title = document.createElement('div');
-        title.className = 'product-title';
-        title.textContent = product['Product Title'];
-        const qty = document.createElement('div');
-        qty.className = 'product-qty';
-        qty.textContent = product['Quantity'] || 0;
-        card.appendChild(title);
-        card.appendChild(qty);
-        productList.appendChild(card);
+      document.getElementById('loading').style.display = 'block';
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        document.getElementById('loading').style.display = 'none';
+        return data;
+      } catch (e) {
+        document.getElementById('loading').innerHTML = '<span>Unable to load inventory. Try again later.</span>';
+        return [];
       }
-    }
-
-    function openModal(product) {
-      closeModal(); // remove any open modal
-      const modalBackdrop = document.createElement('div');
-      modalBackdrop.className = 'modal-backdrop';
-      modalBackdrop.onclick = (e) => { if (e.target === modalBackdrop) closeModal(); };
-      // Modal content
-      const modal = document.createElement('div');
-      modal.className = 'modal';
-      // Close button
-      const closeBtn = document.createElement('button');
-      closeBtn.className = 'modal-close';
-      closeBtn.innerHTML = '&times;';
-      closeBtn.onclick = closeModal;
-      modal.appendChild(closeBtn);
-
-      // Image
-      const img = document.createElement('img');
-      img.src = product['Image URL'];
-      img.className = 'modal-image';
-      modal.appendChild(img);
-
-      // Product Title
-      const t = document.createElement('div');
-      t.className = 'modal-title';
-      t.textContent = product['Product Title'];
-      modal.appendChild(t);
-
-      // Qty controls
-      const qtyControls = document.createElement('div');
-      qtyControls.className = 'modal-qty-controls';
-
-      const minusBtn = document.createElement('button');
-      minusBtn.className = 'modal-qty-btn';
-      minusBtn.textContent = '–';
-      const plusBtn = document.createElement('button');
-      plusBtn.className = 'modal-qty-btn';
-      plusBtn.textContent = '+';
-
-      const qtyInput = document.createElement('input');
-      qtyInput.type = 'number';
-      qtyInput.min = 0;
-      qtyInput.className = 'modal-qty-input';
-      qtyInput.value = product['Quantity'] || 0;
-
-      minusBtn.onclick = () => { qtyInput.value = Math.max(0, Number(qtyInput.value) - 1); };
-      plusBtn.onclick = () => { qtyInput.value = Number(qtyInput.value) + 1; };
-
-      qtyControls.appendChild(minusBtn);
-      qtyControls.appendChild(qtyInput);
-      qtyControls.appendChild(plusBtn);
-      modal.appendChild(qtyControls);
-
-      // Save button
-      const saveBtn = document.createElement('button');
-      saveBtn.className = 'modal-save-btn';
-      saveBtn.textContent = 'Save';
-
-      saveBtn.onclick = async () => {
-        saveBtn.disabled = true;
-        saveBtn.innerHTML = '<div class="spinner"></div>';
-        try {
-          await updateQty(product, Number(qtyInput.value));
-          closeModal();
-          inventory = await fetchInventory();
-          renderProductList(filterList(document.getElementById('searchInput').value));
-        } catch {
-          saveBtn.textContent = 'Try Again';
-          saveBtn.disabled = false;
-        }
-      };
-
-      modal.appendChild(saveBtn);
-      modalBackdrop.appendChild(modal);
-      document.body.appendChild(modalBackdrop);
-    }
-
-    function closeModal() {
-      const existing = document.querySelector('.modal-backdrop');
-      if (existing) existing.remove();
     }
 
     async function updateQty(product, newQty) {
@@ -329,34 +191,32 @@
         newQty: newQty,
         action: 'Manual Update'
       };
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const text = await res.text();
-      if (!text.startsWith('Success')) throw new Error('Update failed');
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify(payload)
+        });
+        const result = await res.text();
+        if (result.startsWith("Success")) {
+          product['Quantity'] = newQty;
+          // update in-memory and filtered view
+          renderTable(filteredProducts);
+        } else {
+          alert('Update failed: ' + result);
+        }
+      } catch (error) {
+        alert('Network error');
+      }
     }
-
-    function filterList(query) {
-      query = (query || '').trim().toLowerCase();
-      if (!query) return inventory;
-      return inventory.filter(item => item['Product Title'].toLowerCase().includes(query));
-    }
-
-    // Debounce search for smoother UX
-    document.getElementById('searchInput').addEventListener('input', function () {
-      clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(() => {
-        renderProductList(filterList(this.value));
-      }, 180);
-    });
 
     // Initial load
-    (async () => {
-      inventory = await fetchInventory();
-      renderProductList(inventory);
-    })();
+    fetchInventory().then(products => {
+      allProducts = products;
+      filteredProducts = products.slice();
+      renderTable(products);
+      document.getElementById('product-table').style.display = 'block';
+    });
   </script>
 </body>
 </html>
