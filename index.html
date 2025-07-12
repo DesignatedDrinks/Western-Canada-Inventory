@@ -194,6 +194,7 @@
     const loginBox = document.getElementById('login-box');
     const loginError = document.getElementById('login-error');
     const loginBtn = document.getElementById('login-btn');
+    const appRoot = document.getElementById('app-root');
 
     function handleLogin() {
       loginError.textContent = '';
@@ -202,14 +203,13 @@
       const ok = users.some(user => user.username === u && user.password === p);
       if (ok) {
         loginModal.style.display = 'none';
-        document.getElementById('app-root').style.display = '';
+        appRoot.style.display = '';
       } else {
         loginError.textContent = 'Wrong username or password.';
       }
     }
     loginBox.onsubmit = handleLogin;
     loginBtn.onclick = handleLogin;
-    // Allow enter key to submit
     document.getElementById('login-password').addEventListener('keydown', function(e) {
       if (e.key === 'Enter') handleLogin();
     });
@@ -386,6 +386,7 @@
       expandedBreweries = {}; // ALL collapsed on load
       renderBreweryList(products);
     });
+
   </script>
 </body>
 </html>
