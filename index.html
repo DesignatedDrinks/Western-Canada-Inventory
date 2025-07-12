@@ -109,6 +109,26 @@
     #spinner .lds-dual-ring:after { content:" "; display:block;width:46px;height:46px;margin:1px;border-radius:50%;border:6px solid #001f3f;border-color:#001f3f transparent #001f3f transparent;animation:lds-dual-ring 1.1s linear infinite;}
     @keyframes lds-dual-ring { 0% { transform:rotate(0deg);} 100% {transform:rotate(360deg);} }
   </style>
+  <!-- BEGIN LOGIN SCRIPT -->
+  <script>
+    // Basic multi-user "login" (not secure, but keeps randoms out)
+    const users = [
+      { username: "jeff", password: "beerninja" },
+      { username: "mike", password: "designated" },
+      { username: "kris", password: "mocktailqueen" }
+    ];
+    function checkLogin() {
+      let u = prompt("Username:");
+      let p = prompt("Password:");
+      let found = users.some(user => user.username === u && user.password === p);
+      if (!found) {
+        alert("Nope.");
+        location.reload();
+      }
+    }
+    checkLogin();
+  </script>
+  <!-- END LOGIN SCRIPT -->
 </head>
 <body>
   <div class="navbar">
