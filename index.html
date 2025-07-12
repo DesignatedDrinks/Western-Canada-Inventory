@@ -9,33 +9,47 @@
     header {
       display: flex;
       align-items: center;
-      margin-bottom: 8px;
-      min-height: 48px;
-      /* For small screens: keep logo and center heading */
-      justify-content: flex-start;
-      gap: 10px;
+      justify-content: center;
+      margin-bottom: 0;
+      min-height: 65px;
+      gap: 18px;
+      position: relative;
     }
     .logo {
-      height: 38px;
+      height: 54px;
       width: auto;
       display: block;
-      margin-right: 12px;
+      position: absolute;
+      left: 0;
+      top: 6px;
+      margin-left: 8px;
     }
-    @media (max-width: 420px) {
-      .logo { height: 30px; margin-right: 8px; }
-      h1 { font-size: 1.23rem; }
+    @media (max-width: 600px) {
+      header { min-height: 40px; }
+      .logo { height: 45px; margin-left: 0; }
     }
     h1 { 
       text-align: center; 
       color: #001f3f; 
-      margin-bottom: 8px; 
-      flex: 1;
+      margin: 0 auto 8px auto; 
       font-size: 2rem;
       font-weight: 700;
       letter-spacing: -1px;
-      line-height: 1.15;
+      line-height: 1.18;
+      width: 100%;
     }
-    #searchbar { display:block; margin: 0 auto 18px auto; width:100%; max-width:430px; padding:10px 14px; border-radius:8px; border:1px solid #ddd; font-size:18px; }
+    #searchbar { 
+      display: block; 
+      margin: 0 auto 18px auto; 
+      width: 100%; 
+      max-width: 430px; 
+      padding: 10px 14px; 
+      border-radius: 8px; 
+      border: 1px solid #ddd; 
+      font-size: 18px; 
+      box-sizing: border-box;
+      text-align: center;
+    }
     .table { max-width:600px; margin:0 auto; border-radius:12px; background:#fff; box-shadow:0 2px 12px rgba(0,0,0,0.04); overflow:hidden;}
     table { width:100%; border-collapse:collapse; }
     th, td { padding:14px 6px; text-align:left; }
