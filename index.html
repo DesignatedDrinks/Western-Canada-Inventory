@@ -10,7 +10,6 @@
       font-family: 'SF Pro Display', 'Segoe UI', Arial, sans-serif;
       margin: 0; padding: 0; background: #f4f6f8; color: #222; min-height: 100vh;
     }
-    /* Login Modal */
     #login-modal {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       display: flex; align-items: center; justify-content: center;
@@ -30,11 +29,22 @@
     #login-box label {
       display: block; text-align: left; margin: 10px 0 2px 2px; font-weight: 500; font-size: 1.04em; color: #243;
     }
-    #login-box input {
+    #login-box input[type="text"], #login-box input[type="password"] {
       width: 100%; padding: 11px 12px; border-radius: 8px;
       border: 1px solid #dbe5ef; background: #f7fafc;
       margin-bottom: 7px; font-size: 1em; font-family: inherit;
       box-sizing: border-box;
+    }
+    #login-remember-row {
+      display: flex; align-items: center; justify-content: flex-start;
+      width: 100%; margin: 7px 0 2px 0; font-size: 1em;
+    }
+    #login-remember-row input[type="checkbox"] {
+      accent-color: #001f3f; width: 19px; height: 19px; margin-right: 9px;
+    }
+    #login-remember-row label {
+      margin: 0; font-weight: 500; font-size: 0.99em; color: #243;
+      user-select: none;
     }
     #login-box button {
       width: 100%; padding: 10px 0; background: #001f3f; color: #fff;
@@ -43,7 +53,6 @@
     }
     #login-error { color: #c23; font-size: 0.98em; margin-top: 4px; min-height: 20px;}
 
-    /* Inventory App Styles */
     .navbar {
       display: flex; align-items: center; justify-content: flex-start;
       padding: 16px 0 6px 0; max-width: 700px; margin: 0 auto; gap: 16px;
@@ -62,74 +71,34 @@
       font-size: 17px; background: #fff;
       font-family: inherit; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
     }
-    .brewery-group {
-      background: none;
-      margin: 10px auto 4px auto;
-      max-width: 700px;
-      border-radius: 13px;
-      transition: box-shadow 0.18s;
-    }
+    .brewery-group { background: none; margin: 10px auto 4px auto; max-width: 700px; border-radius: 13px; transition: box-shadow 0.18s;}
     .brewery-header {
       display: flex; align-items: center; justify-content: flex-start;
-      border: none; width: 100%;
-      border-radius: 13px; padding: 10px 12px 10px 10px;
-      font-size: 1.15rem; font-weight: 700;
-      background: #e5edf7;
-      color: #142C47;
-      cursor: pointer;
-      transition: background 0.14s;
+      border: none; width: 100%; border-radius: 13px; padding: 10px 12px 10px 10px;
+      font-size: 1.15rem; font-weight: 700; background: #e5edf7;
+      color: #142C47; cursor: pointer; transition: background 0.14s;
       box-shadow: 0 1.5px 6px rgba(80,110,160,0.04);
       user-select: none; position: relative; margin-bottom: 0;
     }
-    .brewery-header .chevron {
-      font-size: 1.2em; color: #254785; margin-right: 11px;
-      transition: transform 0.18s;
-      display: inline-block;
-    }
+    .brewery-header .chevron { font-size: 1.2em; color: #254785; margin-right: 11px; transition: transform 0.18s; display: inline-block;}
     .brewery-header.open .chevron { transform: rotate(90deg);}
-    .brewery-header .brewery-title {
-      flex: 1; text-align: left; font-size: 1.13em; font-weight: 700;
-      letter-spacing: 0.01em; padding-right: 10px;
-    }
+    .brewery-header .brewery-title { flex: 1; text-align: left; font-size: 1.13em; font-weight: 700; letter-spacing: 0.01em; padding-right: 10px;}
     .brewery-header:active, .brewery-header:focus { background: #dbe6f5; }
-    .brewery-body {
-      background: #fff; border-radius: 0 0 13px 13px; margin-top: 0;
-      padding: 0 0 6px 0; box-shadow: none;
-    }
+    .brewery-body { background: #fff; border-radius: 0 0 13px 13px; margin-top: 0; padding: 0 0 6px 0; box-shadow: none;}
     .prod-row {
       display: flex; align-items: center; justify-content: space-between;
-      border-bottom: 1px solid #f0f0f0;
-      padding: 13px 8px 13px 18px;
+      border-bottom: 1px solid #f0f0f0; padding: 13px 8px 13px 18px;
       font-size: 1.05rem; min-height: 44px; cursor: pointer;
-      border-radius: 8px; background: none;
-      margin: 0 2px; transition: background 0.13s;
+      border-radius: 8px; background: none; margin: 0 2px; transition: background 0.13s;
     }
     .prod-row:active, .prod-row:focus { background: #f4f8fc; }
     .prod-row:last-child { border-bottom: none; }
-    .prod-name {
-      flex: 1; font-weight: 500; color: #223366;
-      overflow-wrap: break-word; white-space: normal; line-height: 1.15; padding-right: 8px;
-    }
-    .prod-qty {
-      font-size: 1.45em; font-weight: 700; margin-left: 17px;
-      text-align: right; min-width: 34px; display: inline-block;
-      letter-spacing: 1px; color: #17439a;
-    }
+    .prod-name { flex: 1; font-weight: 500; color: #223366; overflow-wrap: break-word; white-space: normal; line-height: 1.15; padding-right: 8px;}
+    .prod-qty { font-size: 1.45em; font-weight: 700; margin-left: 17px; text-align: right; min-width: 34px; display: inline-block; letter-spacing: 1px; color: #17439a;}
     .prod-qty.zero { color: #e14b36; }
     #loading { text-align: center; margin-top: 32px; font-size: 20px; }
-    /* Modal styles */
-    #modal {
-      display: none; position: fixed; z-index: 10;
-      left: 0; top: 0; width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.33);
-      justify-content: center; align-items: flex-start;
-    }
-    #modal-content {
-      background: white; border-radius: 15px; padding: 14px 10px 16px 10px;
-      width: 93vw; max-width: 320px; margin-top: 6vh;
-      box-shadow: 0 7px 32px rgba(0,0,0,0.15);
-      text-align: center; position: relative; animation: popin .16s;
-    }
+    #modal { display: none; position: fixed; z-index: 10; left: 0; top: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.33); justify-content: center; align-items: flex-start;}
+    #modal-content { background: white; border-radius: 15px; padding: 14px 10px 16px 10px; width: 93vw; max-width: 320px; margin-top: 6vh; box-shadow: 0 7px 32px rgba(0,0,0,0.15); text-align: center; position: relative; animation: popin .16s;}
     #modal-img { max-width: 88px; margin-bottom: 10px; }
     #modal-title { font-size: 15px; font-weight: bold; margin-bottom: 9px; color: #001f3f; }
     #modal-qty { width: 46px; font-size: 16px; border-radius: 5px; border: 1px solid #eee; margin: 0 5px;}
@@ -153,11 +122,14 @@
       <input id="login-username" type="text" autocomplete="username" required autofocus>
       <label for="login-password">Password</label>
       <input id="login-password" type="password" autocomplete="current-password" required>
+      <div id="login-remember-row">
+        <input id="login-remember" type="checkbox">
+        <label for="login-remember">Keep me signed in</label>
+      </div>
       <button id="login-btn" type="button">Login</button>
       <div id="login-error"></div>
     </div>
   </div>
-
   <!-- Your inventory app -->
   <div id="app-root" style="display:none;">
     <div class="navbar">
@@ -167,7 +139,6 @@
     <input id="searchbar" type="text" placeholder="Search product name...">
     <div id="loading"><span>Loading inventory...</span></div>
     <div id="brewery-list"></div>
-    <!-- Modal for editing qty -->
     <div id="modal">
       <div id="modal-content">
         <span id="modal-close">&times;</span>
@@ -181,10 +152,8 @@
         <button id="modal-save">Save</button>
       </div>
     </div>
-    <!-- Spinner overlay -->
     <div id="spinner"><div class="lds-dual-ring"></div></div>
   </div>
-
   <script>
     // LOGIN LOGIC
     const users = [
@@ -195,18 +164,27 @@
     const loginModal = document.getElementById('login-modal');
     const loginError = document.getElementById('login-error');
     const appRoot = document.getElementById('app-root');
-    // Focus on username on load
-    document.getElementById('login-username').focus();
+
+    // Check if already signed in
+    if (localStorage.getItem('signedInInventoryUser')) {
+      loginModal.style.display = 'none';
+      appRoot.style.display = '';
+      setTimeout(() => { loginModal.remove(); }, 700);
+    }
 
     function handleLogin() {
       loginError.textContent = '';
       const u = document.getElementById('login-username').value.trim();
       const p = document.getElementById('login-password').value;
+      const keepSignedIn = document.getElementById('login-remember').checked;
       const ok = users.some(user => user.username === u && user.password === p);
       if (ok) {
+        if (keepSignedIn) {
+          localStorage.setItem('signedInInventoryUser', u);
+        }
         loginModal.style.display = 'none';
         appRoot.style.display = '';
-        setTimeout(() => { loginModal.remove(); }, 800); // Remove for accessibility
+        setTimeout(() => { loginModal.remove(); }, 800);
       } else {
         loginError.textContent = 'Wrong username or password.';
         document.getElementById('login-password').value = '';
@@ -228,7 +206,6 @@
     let filteredProducts = [];
     let expandedBreweries = {};
     let currentModalProduct = null;
-
     function groupByBrewery(products) {
       const groups = {};
       products.forEach(p => {
@@ -246,8 +223,6 @@
         const isOpen = expandedBreweries[brewery];
         const groupDiv = document.createElement('div');
         groupDiv.className = 'brewery-group';
-
-        // Header
         const header = document.createElement('button');
         header.type = 'button';
         header.className = 'brewery-header' + (isOpen ? ' open' : '');
@@ -265,8 +240,6 @@
         title.textContent = brewery;
         header.appendChild(title);
         groupDiv.appendChild(header);
-
-        // Body (list of products)
         if (isOpen) {
           const body = document.createElement('div');
           body.className = 'brewery-body';
@@ -274,20 +247,14 @@
             const row = document.createElement('div');
             row.className = 'prod-row';
             row.onclick = () => showModal(prod);
-
-            // Product name
             const name = document.createElement('span');
             name.className = 'prod-name';
             name.textContent = prod['Product Title'];
-
-            // Quantity
             const qty = document.createElement('span');
             qty.className = 'prod-qty' + ((parseInt(prod['Quantity']) === 0) ? ' zero' : '');
             qty.textContent = prod['Quantity'] || 0;
-
             row.appendChild(name);
             row.appendChild(qty);
-
             body.appendChild(row);
           });
           groupDiv.appendChild(body);
@@ -329,10 +296,8 @@
       hideSpinner();
       hideModal();
     };
-    // Spinner functions
     function showSpinner() { document.getElementById('spinner').style.display = 'flex'; }
     function hideSpinner() { document.getElementById('spinner').style.display = 'none'; }
-    // Filtering/search
     document.getElementById('searchbar').addEventListener('input', function() {
       const term = this.value.trim().toLowerCase();
       if (!term) {
@@ -355,7 +320,6 @@
         return [];
       }
     }
-    // Update quantity on save
     async function updateQty(product, newQty) {
       const payload = {
         productTitle: product['Product Title'],
